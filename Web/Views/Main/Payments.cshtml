@@ -1,0 +1,63 @@
+﻿@using Core;
+@using Core.Classes;
+@using Web.Models;
+@model PaymentsModel
+
+@{
+	this.ViewBag.Title = "Payments for " + (this.Model.Receipt != null ? this.Model.Receipt.Name : this.Model.RentName);
+	this.ViewBag.BackLink = new
+	{
+		url = this.Url.Action("ReceiptsByMonth", "Main", new { id = this.Model.RentId }),
+		text = "Back to " + this.Model.RentName
+	};
+
+	IEnumerable<RowModel> rows = new List<RowModel>();
+	if (this.Model.Payments != null)
+	{
+		rows = this.Model.Payments.Select(r => new RowModel(r));
+	}
+
+	Dictionary<Guid, string> names = this.Model.Renters.ToDictionary(r => r.Id, r => r.FullName);
+	Dictionary<Guid, string> receipts = this.Model.Receipts.ToDictionary(r => r.Id, r => r.Name);
+
+	string receiptId = "false";
+	if (this.Model.Receipt != null)
+	{
+		receiptId = this.Model.Receipt.Id.ToString();
+	}
+}
+
+<div class="input-group col-xs-3" ng-controller="calculator">
+	<input type="text" class="form-control" ng-model="calcFunction" ng-keyup="calcEval($event)" placeholder="Calculate" />
+	<div class="input-group-addon">Value: {{calcVal}}</div>
+</div>
+
+@if (this.Model.Receipt != null)
+{
+	<div>
+		<strong>Total:</strong> @this.Model.Receipt.Total
+	</div>
+	<div>
+		<strong>Tip:</strong> @this.Model.Receipt.Tip
+	</div>
+	<div>
+		<strong>Tax:</strong> @this.Model.Receipt.Tax
+	</div>
+}
+
+@this.Html.Partial("_dataTable")
+
+@section scripts{
+	<script>
+		var renters = @this.Html.Raw(Utilities.SerializeToJson(this.Model.Renters));
+		var payments = @this.Html.Raw(Utilities.SerializeToJson(this.Model.Payments));
+		var receiptId = "@(receiptId)";
+
+		rent.loadPayments(@this.Html.Raw(Utilities.SerializeToJson(rows)),
+			@(this.Html.Raw(Utilities.SerializeToJson(names))),
+				receiptId,
+				@(this.Html.Raw(Utilities.SerializeToJson(receipts))),
+				"@(this.Url.Action("Payment", "WebApi", new { httproute = "" }))",
+				"@(this.Url.Action("Receipt", "Validation", new { httproute = "" }))");
+	</script>
+}

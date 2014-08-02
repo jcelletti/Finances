@@ -1,0 +1,23 @@
+﻿@using Core;
+@using Core.Classes;
+@using Web.Models;
+
+@model List<Core.Classes.Renter>
+
+@{
+	this.ViewBag.Title = "Renters";
+	IEnumerable<RowModel> rows = new List<RowModel>();
+	if (this.Model != null)
+	{
+		rows = this.Model.Select(r => new RowModel(r));
+	}
+}
+
+@this.Html.Partial("_dataTable");
+
+@section scripts{
+	<script>
+		rent.loadRenters(@this.Html.Raw(Utilities.SerializeToJson(rows)),
+			"@(this.Url.Action("Renter", "WebApi", new { httproute = "" }))")
+	</script>
+}

@@ -1,0 +1,22 @@
+﻿@using Core;
+@using Core.Classes;
+@using Web.Models;
+
+@model List<Rent>
+@{
+	this.ViewBag.Title = "Rents";
+}
+
+@this.Html.Partial("_dataTable")
+
+@section scripts
+{
+	<script type="text/javascript">
+	rent.loadRents(@(this.Html.Raw(Utilities.SerializeToJson(this.Model.Select(m=> new RowModel(m))))),
+
+			"@(this.Url.Action("ReceiptsByMonth", "Main"))/",
+			"@(this.Url.Action("PaymentsByMonth", "Main"))/",
+			"@(this.Url.Action("Rent", "Validation", new { httproute=""}))/",
+			"@(this.Url.Action("Rent", "WebApi", new { httproute=""}))/");
+	</script>
+}

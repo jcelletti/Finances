@@ -1,0 +1,35 @@
+﻿@using Core;
+@using Web.Models;
+@model ReceiptsModel
+
+@{
+	this.ViewBag.Title = Model.IsByRent ? "Receipts for " + Model.Rent : "All Receipts";
+
+	IEnumerable<RowModel> rows = new List<RowModel>();
+	if (this.Model.Receipts != null)
+	{
+		rows = this.Model.Receipts.Select(r => new RowModel(r));
+	}
+
+	Dictionary<Guid, string> names = this.Model.Renters.ToDictionary(r => r.Id, r => r.FullName);
+}
+
+<div id="validated"></div>
+
+@this.Html.Partial("_dataTable")
+
+@section scripts{
+	<script>
+		var isByRent = @Utilities.SerializeToJson(this.Model.IsByRent);
+		var rentId = @(this.Html.Raw(Utilities.SerializeToJson(this.Model.RentId)));
+
+		rent.loadReceipts(isByRent,
+			@(this.Html.Raw(Utilities.SerializeToJson(rows))),
+			@(this.Html.Raw(Utilities.SerializeToJson(names))),
+			rentId,
+			"@(this.Url.Action("Receipt", "WebApi", new { httproute = "" }))",
+			"@(this.Url.Action("PaymentsByReceipt", "Main"))",
+			"@(this.Url.Action("Receipt", "Validation", new { httproute = "" }))",
+			"@(this.Url.Action("Rent", "Validation", new { httproute = "" }))");
+	</script>
+}

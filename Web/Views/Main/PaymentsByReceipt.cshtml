@@ -1,0 +1,52 @@
+﻿@using Core;
+@using Core.Classes;
+@using Web.Models;
+@model PaymentsModel
+
+@{
+	this.ViewBag.Title = "Payments for " + this.Model.Receipt.Name;
+	this.ViewBag.BackLink = new
+	{
+		url = this.Url.Action("ReceiptsByMonth", "Main", new { id = this.Model.RentId }),
+		text = "Back to " + this.Model.RentName
+	};
+
+	IEnumerable<RowModel> rows = new List<RowModel>();
+	if (this.Model.Payments != null)
+	{
+		rows = this.Model.Payments.Select(r => new RowModel(r));
+	}
+
+	Dictionary<Guid, string> names = this.Model.Renters.ToDictionary(r => r.Id, r => r.FullName);
+}
+
+<div class="input-group col-xs-3" ng-controller="calculator">
+	<input type="text" class="form-control" ng-model="calcFunction" ng-keyup="calcEval($event)" placeholder="Calculate" />
+	<div class="input-group-addon">Value: {{calcVal}}</div>
+</div>
+
+<div>
+	<strong>Total:</strong> @this.Model.Receipt.Total
+</div>
+<div>
+	<strong>Tip:</strong> @this.Model.Receipt.Tip
+</div>
+<div>
+	<strong>Tax:</strong> @this.Model.Receipt.Tax
+</div>
+
+@this.Html.Partial("_dataTable")
+
+@section scripts{
+	<script>
+		var renters = @this.Html.Raw(Utilities.SerializeToJson(this.Model.Renters));
+		var payments = @this.Html.Raw(Utilities.SerializeToJson(this.Model.Payments));
+		var receiptId = @this.Html.Raw(Utilities.SerializeToJson(this.Model.Receipt.Id));
+
+		rent.loadPayments(@this.Html.Raw(Utilities.SerializeToJson(rows)),
+			@(this.Html.Raw(Utilities.SerializeToJson(names))),
+			receiptId,
+			"@(this.Url.Action("Payment", "WebApi", new { httproute = "" }))",
+			"@(this.Url.Action("Receipt", "Validation", new { httproute = "" }))");
+	</script>
+}

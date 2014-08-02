@@ -1,0 +1,70 @@
+﻿@using Core;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>@this.ViewBag.Title</title>
+	<link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+	<meta name="viewport" content="width=device-width" />
+
+	@this.RenderSection("styles", required: false)
+	@Styles.Render("~/Content/css")
+
+	@Scripts.Render("~/bundles/modernizr",
+	"~/bundles/jquery",
+	"~/bundles/jqueryui",
+	"~/bundles/Moment",
+	"~/bundles/Sitejs",
+	"~/bundles/AngularJs")
+</head>
+@{
+	var links = new List<dynamic>();
+	links.Add(new
+	{
+		url = this.Url.Action("Index", "Main"),
+		text = "Rents"
+	});
+	links.Add(new
+	{
+		url = this.Url.Action("Renters", "Main"),
+		text = "Renters"
+	});
+	links.Add(new
+	{
+		url = this.Url.Action("Receipts", "Main"),
+		text = "All Receipts"
+	});
+	if (this.ViewData.ContainsKey("BackLink"))
+	{
+		links.Add(this.ViewData["BackLink"]);
+	}
+}
+
+<body ng-app="main">
+	<header ng-controller="header">
+		<h1>@this.ViewBag.Title</h1>
+		<div class="btn-group">
+			<button ng-repeat="link in links" type="button" class="btn btn-default" ng-click="gotoLink(link)">{{link.text}}</button>
+		</div>
+	</header>
+	<div id="body">
+		@this.RenderBody()
+	</div>
+
+	<script type="text/javascript">
+		rent.loadApp(@(this.Html.Raw(Utilities.SerializeToJson(links))));
+	</script>
+
+	@this.RenderSection("scripts", required: false)
+</body>
+</html>
+
+<script type="text/ng-template" id="ng-text">
+	<input type="text" class="form-control" ng-model="row.data[col.key]" />
+</script>
+
+<script type="text/ng-template" id="ng-select">
+	<select class="form-control" ng-model="row.data[col.key]">
+		<option ng-repeat="">{{}}</option>
+	</select>
+</script>
