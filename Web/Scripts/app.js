@@ -24,10 +24,37 @@
 		text: function () { return "<input type='text' class='form-control' ng-model='templateValue' />" },
 		datePicker: function (scope) {
 			scope.dt = moment(scope.templateValue).toDate();
+			scope.dateOptions = {
+				formatYear: 'yyyy',
+			};
+
+			scope.disabled = function (date, mode) {
+				return false;
+			};
+
+			scope.maxDate = moment("01/01/2100").toDate();
+
+			scope.minDate = moment("01/01/2000").toDate();
+
+			scope.opened = false;
+
+			scope.open = function ($event) {
+				$event.preventDefault();
+				$event.stopPropagation();
+
+				scope.opened = true;
+			};
+
 			scope.$watch('dt', function (newValue, oldValue) {
 				scope.templateValue = newValue.toISOString();
 			});
-			return '<datepicker ng-model="dt" show-weeks="true"></datepicker>';
+
+			return '<div class="input-group datepicker-group">' +
+		 ' <input type="text" class="form-control" datepicker-popup="dd-MMMM-yyyy" ng-model="dt" is-open="opened" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" ng-required="true" close-text="Close" />' +
+		  '<span class="input-group-btn">' +
+			'<button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>' +
+		  '</span>' +
+		'</div>';
 		},
 	};
 

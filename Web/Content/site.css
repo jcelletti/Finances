@@ -1,4 +1,4 @@
-/*! normalize.css v3.0.1 | MIT License | git.io/normalize */
+﻿/*! normalize.css v3.0.1 | MIT License | git.io/normalize */
 html {
   font-family: sans-serif;
   -ms-text-size-adjust: 100%;
@@ -6225,5 +6225,8 @@ header .btn-group {
 }
 .data-grid-container .data-grid tbody tr td {
   vertical-align: middle;
+}
+.datepicker-group {
+  max-width: 200px;
 }
 /*# sourceMappingURL=site.css.map */
