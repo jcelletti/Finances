@@ -13,11 +13,95 @@
 	}
 }
 
-@this.Html.Partial("_dataTable");
+<div ng-controller="data-table">
+	<edit-data-table rows="rows"
+					 columns="columns"
+					 order-by-column="orderByColumn"
+					 action-buttons="actionButtons"
+					 header-buttons="headerButtons"
+					 add="add"></edit-data-table>
+</div>
 
 @section scripts{
 	<script>
-		rent.loadRenters(@this.Html.Raw(Utilities.SerializeToJson(rows)),
-			"@(this.Url.Action("Renter", "WebApi", new { httproute = "" }))")
+		var renters =@this.Html.Raw(Utilities.SerializeToJson(rows)),
+			apiLocation ="@(this.Url.Action("Renter", "WebApi", new { httproute = "" }))";
+
+		rent.loadDataTable(function ($scope) {
+			$scope.rows = renters;
+			$scope.columns = [
+				{ key: "First", text: "First" },
+				{ key: "Last", text: "Last" }
+			];
+
+			$scope.headerButtons = [
+				{
+					text: "Add Renter",
+					className: "btn-primary",
+					click: function () {
+						$.ajax({
+							url: apiLocation,
+							type: 'POST',
+							success: function (result) {
+								$scope.rows.push(result);
+								$scope.$apply();
+							},
+							error: function (result) {
+								console.log('error');
+								console.log(result);
+							}
+						});
+					}
+				}
+			];
+
+			$scope.actionButtons = [
+				{
+					text: "Delete",
+					visible: function (row) { return !row.isEditing; },
+					className: "btn-danger",
+					click: function (row) {
+						if (confirm("Are you sure?")) {
+							$.ajax({
+								url: apiLocation + "/" + row.data.Id,
+								type: 'DELETE',
+								success: function (result) {
+									console.log('deleted');
+									var index = $scope.rows.indexOf(row);
+									$scope.rows.splice(index, 1);
+									$scope.$apply();
+								},
+								error: function (result) {
+									console.error('error');
+									console.error(result);
+								}
+							});
+						}
+					}
+				},
+				{
+					text: "Save",
+					visible: function (row) { return row.isEditing; },
+					className: "btn-success",
+					click: function (row) {
+						$.ajax({
+							url: apiLocation,
+							type: 'PUT',
+							data: row.data,
+							success: function (result) {
+								console.log('saved');
+								$.extend(row, result);
+								$scope.$apply();
+							},
+							error: function (result) {
+								console.error('error');
+								console.error(result);
+							}
+						});
+					}
+				}
+			];
+
+		}, true);
 	</script>
 }

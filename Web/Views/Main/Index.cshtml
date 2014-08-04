@@ -7,16 +7,160 @@
 	this.ViewBag.Title = "Rents";
 }
 
-@this.Html.Partial("_dataTable")
+<div ng-controller="data-table">
+	<edit-data-table rows="rows"
+					 columns="columns"
+					 order-by-column="orderByColumn"
+					 action-buttons="actionButtons"
+					 header-buttons="headerButtons"
+					 add="add"></edit-data-table>
+</div>
 
 @section scripts
 {
 	<script type="text/javascript">
-	rent.loadRents(@(this.Html.Raw(Utilities.SerializeToJson(this.Model.Select(m=> new RowModel(m))))),
+		rent.loadDataTable(function($scope){
+			var receiptsLocation ="@(this.Url.Action("ReceiptsByMonth", "Main"))/",
+				paymentsLocation = "@(this.Url.Action("PaymentsByMonth", "Main"))/",
+				validationLocation ="@(this.Url.Action("Rent", "Validation", new { httproute=""}))/",
+				apiLocation ="@(this.Url.Action("Rent", "WebApi", new { httproute=""}))/";
 
-			"@(this.Url.Action("ReceiptsByMonth", "Main"))/",
-			"@(this.Url.Action("PaymentsByMonth", "Main"))/",
-			"@(this.Url.Action("Rent", "Validation", new { httproute=""}))/",
-			"@(this.Url.Action("Rent", "WebApi", new { httproute=""}))/");
+			$scope.rows = @(this.Html.Raw(Utilities.SerializeToJson(this.Model.Select(m=> new RowModel(m)))));
+			$scope.columns = [
+				{ key: "Name", text: "Name", editingTemplate: "text" },
+				{ key: "Month", text: "Month", formatString: "LL", format: rent.formats.date, editingTemplate: "datePicker" }
+			];
+
+			$scope.orderByColumn = "Name";
+
+			$scope.actionButtons = [
+						{
+							text: "Receipts",
+							visible: function (row) { return !row.isEditing; },
+							className: "btn-info",
+							click: function (rent) {
+								window.location = receiptsLocation + rent.data.Id;
+							}
+						},
+						{
+							text: "Payments",
+							visible: function (row) { return !row.isEditing; },
+							className: "btn-info",
+							click: function (row) {
+								window.location = paymentsLocation + row.data.Id;
+							}
+						},
+						{
+							text: "Validate",
+							visible: function (row) { return !row.isEditing; },
+							className: "btn-primary",
+							click: function (rent) {
+								$.ajax({
+									url: validationLocation + rent.Id,
+									type: 'POST',
+									success: function (result) {
+										var ul = $('<ul />');
+										$(result).each(function (i, pay) {
+											var li = $('<li><span>' + pay.Name + '</span>:<span style="padding-left: 1em">' + pay.Owed + '</span></li>');
+											ul.append(li);
+										});
+
+										ul.appendTo("#body");
+									},
+									error: function (result) {
+										var error = JSON.parse(result.responseText).ExceptionMessage;
+										alert("Receipt had errors: " + error);
+										console.error(result);
+									}
+								});
+							}
+						},
+						{
+							text: "Delete",
+							visible: function (row) { return !row.isEditing; },
+							className: "btn-danger",
+							click: function (rent) {
+								if (confirm("Are you sure you want to delete '" + rent.Name + "'?")) {
+									$.ajax({
+										url: apiLocation + rent.data.Id,
+										type: 'DELETE',
+										success: function () {
+											console.log('deleted');
+											var index = $scope.rows.indexOf(rent);
+											if (index > -1) {
+												$scope.rows.splice(index, 1);
+											}
+											$scope.$apply();
+										},
+										error: function (result) {
+											console.error('error');
+											console.error(result);
+										}
+									});
+								}
+							}
+						},
+						{
+							text: "Save",
+							visible: function (rent) { return rent.isEditing; },
+							className: "btn-success",
+							click: function (rent) {
+								$.ajax({
+									url: apiLocation,
+									data: rent.data,
+									type: 'PUT',
+									visible: false,
+									success: function (result) {
+										$.extend(rent, result);
+										$scope.$apply();
+									},
+									error: function (result) {
+										console.error('error');
+										console.error(result);
+									}
+								});
+
+							}
+						}
+			];
+
+			$scope.headerButtons = [
+				{
+					text: "Add New",
+					className: "btn-primary",
+					click: function () {
+						$.ajax({
+							url: apiLocation,
+							type: 'POST',
+							success: function (result) {
+								$scope.rows.push(result);
+								$scope.$apply();
+							},
+							error: function (result) {
+								console.log('error');
+								console.log(result);
+							}
+						});
+					}
+				}
+			];
+
+			$scope.add = function () {
+				$.ajax({
+					url: apiLocation,
+					type: 'POST',
+					success: function (result) {
+						$scope.rows.push(result);
+						$scope.$apply();
+					},
+					error: function (result) {
+						console.log('error');
+						console.log(result);
+					}
+				});
+			};
+
+		},
+		true);
 	</script>
 }

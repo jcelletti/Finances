@@ -311,6 +311,7 @@
     <Content Include="Scripts\app.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="Scripts\data.table.js" />
     <Content Include="Scripts\errors.json" />
     <None Include="Scripts\jquery-1.9.1.intellisense.js" />
     <Content Include="Scripts\i18n\angular-locale_af-na.js" />
@@ -661,9 +662,7 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Web.config" />
     <Content Include="Views\Main\Payments.cshtml" />
-    <Content Include="Views\Main\PaymentsByReceipt.cshtml" />
     <Content Include="Scripts\version.json" />
-    <Content Include="Views\Shared\_dataTable.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

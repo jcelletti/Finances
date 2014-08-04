@@ -16,20 +16,179 @@
 
 <div id="validated"></div>
 
-@this.Html.Partial("_dataTable")
+<div ng-controller="data-table">
+	<edit-data-table rows="rows"
+					 columns="columns"
+					 order-by-column="orderByColumn"
+					 action-buttons="actionButtons"
+					 header-buttons="headerButtons"
+					 add="add"></edit-data-table>
+</div>
 
 @section scripts{
 	<script>
 		var isByRent = @Utilities.SerializeToJson(this.Model.IsByRent);
 		var rentId = @(this.Html.Raw(Utilities.SerializeToJson(this.Model.RentId)));
+		var receipts = @(this.Html.Raw(Utilities.SerializeToJson(rows)));
+		var names =@(this.Html.Raw(Utilities.SerializeToJson(names)));
+		var apiLocation="@(this.Url.Action("Receipt", "WebApi", new { httproute = "" }))",
+			paymentsLocation ="@(this.Url.Action("PaymentsByReceipt", "Main"))",
+			receiptValidation="@(this.Url.Action("Receipt", "Validation", new { httproute = "" }))",
+			rentValidation=	"@(this.Url.Action("Rent", "Validation", new { httproute = "" }))";
 
-		rent.loadReceipts(isByRent,
-			@(this.Html.Raw(Utilities.SerializeToJson(rows))),
-			@(this.Html.Raw(Utilities.SerializeToJson(names))),
-			rentId,
-			"@(this.Url.Action("Receipt", "WebApi", new { httproute = "" }))",
-			"@(this.Url.Action("PaymentsByReceipt", "Main"))",
-			"@(this.Url.Action("Receipt", "Validation", new { httproute = "" }))",
-			"@(this.Url.Action("Rent", "Validation", new { httproute = "" }))");
+		rent.loadDataTable(function ($scope) {
+			$scope.rows = receipts;
+			$scope.names = names;
+			$scope.columns = [
+				{ key: "Name", text: "Name" },
+				{ key: "Date", text: "Date", formatString: "LL", format: formats.date, editingTemplate: "datePicker" },
+				{ key: "Tip", text: "Tip" },
+				{ key: "Tax", text: "Tax" },
+				{ key: "Total", text: "Total" },
+				{
+					key: "Payer",
+					text: "Payer",
+					editingTemplate: "select",
+					options: $scope.names,
+					format: function (format, value) {
+						return $scope.names[value];
+					}
+				}
+			];
+
+			$scope.orderByColumn = "Name";
+
+			$scope.actionButtons = [
+				{
+					text: "Payments",
+					visible: function (row) { return !row.isEditing; },
+					className: "btn-info",
+					click: function (rent) {
+						window.location = paymentsLocation + "/" + rent.data.Id;
+					}
+				},
+				{
+					text: "Validate",
+					visible: function (row) { return !row.isEditing; },
+					className: "btn-primary",
+					click: function (row) {
+						$.ajax({
+							url: receiptValidation + '/' + row.data.Id,
+							type: 'POST',
+							success: function (result) {
+								alert("Receipt had no errors");
+							},
+							error: function (result) {
+								var error = JSON.parse(result.responseText).ExceptionMessage;
+								alert("Receipt had errors: " + error);
+								console.error(result);
+							}
+						});
+					}
+				},
+				{
+					text: "Delete",
+					visible: function (row) { return !row.isEditing; },
+					className: "btn-danger",
+					click: function (row) {
+						if (confirm("Are you sure?")) {
+							$.ajax({
+								url: apiLocation + "/" + row.data.Id,
+								type: 'DELETE',
+								success: function (result) {
+									console.log('deleted');
+									var index = $scope.rows.indexOf(row);
+									if (index > -1) {
+										$scope.rows.splice(index, 1);
+									}
+									$scope.$apply();
+								},
+								error: function (result) {
+									console.error('error');
+									console.error(result);
+								}
+							});
+						}
+					}
+				},
+				{
+					text: "Save",
+					visible: function (rent) { return rent.isEditing; },
+					className: "btn-success",
+					click: function (row) {
+						$.ajax({
+							url: apiLocation + "/" + row.data.Id,
+							data: row.data,
+							type: 'PUT',
+							visible: false,
+							success: function (result) {
+								$.extend(row, result);
+								$scope.$apply();
+							},
+							error: function (result) {
+								console.error('error');
+								console.error(result);
+							}
+						});
+
+					}
+				}
+			];
+
+			$scope.headerButtons = [
+				{
+					text: "Add New",
+					className: "btn-primary",
+					click: function () {
+						$.ajax({
+							url: apiLocation + "/" + rentId,
+							type: 'POST',
+							success: function (result) {
+								$scope.rows.push(result);
+								$scope.$apply();
+							},
+							error: function (result) {
+								console.log('error');
+								console.log(result);
+							}
+						});
+					}
+				}
+			];
+
+			if (isByRent) {
+				$scope.headerButtons.push({
+					text: "Validate Rent",
+					className: "btn-warning",
+					click: function () {
+						$.ajax({
+							url: rentValidation + '/' + rentId,
+							type: 'POST',
+							success: function (result) {
+								var ul = $('<ul />');
+								$(result).each(function (i, pmt) {
+									ul.append($('<li><span>' +
+										pmt.Name +
+										'</span>:<span style="padding-left: 1em">$' +
+										pmt.Owed +
+										'</span></li>'));
+								});
+
+								$("#validated").empty();
+
+								ul.appendTo("#validated");
+							},
+							error: function (result) {
+								var error = JSON.parse(result.responseText).ExceptionMessage;
+								alert("Receipt had errors: " + error);
+								console.error(result);
+							}
+						});
+					}
+				});
+			}
+
+		},
+		true);
 	</script>
 }

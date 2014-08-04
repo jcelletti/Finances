@@ -6229,4 +6229,8 @@ header .btn-group {
 .datepicker-group {
   max-width: 200px;
 }
+.calculator-group {
+  max-width: 400px;
+  margin-left: 50px;
+}
 /*# sourceMappingURL=site.css.map */

@@ -27,10 +27,6 @@
 	}
 }
 
-<div class="input-group col-xs-3" ng-controller="calculator">
-	<input type="text" class="form-control" ng-model="calcFunction" ng-keyup="calcEval($event)" placeholder="Calculate" />
-	<div class="input-group-addon">Value: {{calcVal}}</div>
-</div>
 
 @if (this.Model.Receipt != null)
 {
@@ -45,19 +41,141 @@
 	</div>
 }
 
-@this.Html.Partial("_dataTable")
+<div ng-controller="data-table">
+
+	<calculator></calculator>
+	<edit-data-table rows="rows"
+					 columns="columns"
+					 order-by-column="orderByColumn"
+					 action-buttons="actionButtons"
+					 header-buttons="headerButtons"
+					 add="add"></edit-data-table>
+</div>
 
 @section scripts{
 	<script>
 		var renters = @this.Html.Raw(Utilities.SerializeToJson(this.Model.Renters));
-		var payments = @this.Html.Raw(Utilities.SerializeToJson(this.Model.Payments));
 		var receiptId = "@(receiptId)";
 
-		rent.loadPayments(@this.Html.Raw(Utilities.SerializeToJson(rows)),
-			@(this.Html.Raw(Utilities.SerializeToJson(names))),
-				receiptId,
-				@(this.Html.Raw(Utilities.SerializeToJson(receipts))),
-				"@(this.Url.Action("Payment", "WebApi", new { httproute = "" }))",
-				"@(this.Url.Action("Receipt", "Validation", new { httproute = "" }))");
+		var payments =@this.Html.Raw(Utilities.SerializeToJson(rows)),
+			names =	@(this.Html.Raw(Utilities.SerializeToJson(names))),
+				receipts = @(this.Html.Raw(Utilities.SerializeToJson(receipts))),
+				apiLocation ="@(this.Url.Action("Payment", "WebApi", new { httproute = "" }))",
+				validationLocation = "@(this.Url.Action("Receipt", "Validation", new { httproute = "" }))";
+
+		rent.loadDataTable(function ($scope) {
+			$scope.rows = payments;
+			$scope.names = names;
+			$scope.receipts = receipts;
+			$scope.columns = [
+				{
+					key: "Payer",
+					text: "Payer",
+					format: function (format, value) {
+						return $scope.names[value];
+					}
+				},
+				{ key: "Tip", text: "Tip" },
+				{ key: "Tax", text: "Tax" },
+				{ key: "PaymentAmount", text: "Owed" }
+			];
+
+			if (receiptId != "false") {
+				$scope.headerButtons = [
+					{
+						text: "Add Payment",
+						className: "btn-primary",
+						click: function () {
+							$.ajax({
+								url: apiLocation + '/' + receiptId,
+								type: 'POST',
+								success: function (result) {
+									$scope.rows.push(result);
+									$scope.$apply();
+								},
+								error: function (result) {
+									console.log('error');
+									console.log(result);
+								}
+							});
+						}
+					},
+					{
+						text: "Validate Receipt",
+						className: "btn-warning",
+						click: function () {
+							$.ajax({
+								url: validationLocation + '/' + receiptId,
+								type: 'POST',
+								success: function (result) {
+									alert("Receipt had no errors");
+								},
+								error: function (result) {
+									var error = JSON.parse(result.responseText).ExceptionMessage;
+									alert("Receipt had errors: " + error);
+									console.error(result);
+								}
+							});
+						}
+					}
+				];
+			}
+			else {
+				$scope.columns.push({
+					key: "ReceiptId",
+					text: "Receipt",
+					format: function (format, value) {
+						return $scope.receipts[value];
+					}
+				})
+			}
+
+			$scope.actionButtons = [
+				{
+					text: "Delete",
+					className: "btn-danger",
+					visible: function (row) { return !row.isEditing; },
+					click: function (row) {
+						if (confirm("Are you sure?")) {
+							$.ajax({
+								url: apiLocation + "/" + row.data.Id,
+								type: 'DELETE',
+								success: function (result) {
+									console.log('deleted');
+									var index = $scope.rows.indexOf(row);
+									$scope.rows.splice(index, 1);
+									$scope.$apply();
+								},
+								error: function (result) {
+									console.error('error');
+									console.error(result);
+								}
+							});
+						}
+					}
+				},
+				{
+					text: "Save",
+					className: "btn-success",
+					visible: function (row) { return row.isEditing; },
+					click: function (row) {
+						$.ajax({
+							url: apiLocation,
+							type: 'PUT',
+							data: row.data,
+							success: function (result) {
+								$.extend(row, result);
+								$scope.$apply();
+							},
+							error: function (result) {
+								console.error('error');
+								console.error(result);
+							}
+						});
+					}
+				},
+
+			];
+		}, true);
 	</script>
 }
