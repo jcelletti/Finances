@@ -6223,6 +6223,9 @@ header .btn-group {
 .data-grid-container .data-grid > thead > tr > td {
   border-bottom-width: 2px;
 }
+.data-grid-container .data-grid thead tr .data-grid-sortable-header {
+  cursor: pointer;
+}
 .data-grid-container .data-grid tbody tr td {
   vertical-align: middle;
 }

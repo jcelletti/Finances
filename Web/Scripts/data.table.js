@@ -11,7 +11,7 @@ angular.module("edit.data.table", [])
 	'<table class="data-grid">' +
 		'<thead>' +
 			'<tr>' +
-				'<th ng-repeat="col in columns" ng-click="changeOrder(col.key)">' +
+				'<th class="data-grid-sortable-header" ng-repeat="col in columns" ng-click="changeOrder(col.key)">' +
 					'<span class="glyphicon" ng-class="orderByClass(col)"></span>' +
 					'{{col.text}}' +
 				'</th>' +
@@ -97,14 +97,13 @@ angular.module("edit.data.table", [])
 .directive("editControl", function ($compile) {
 	var templates = {
 		select: function (scope) {
-			var column = scope.col;
-			var select = "<select class='form-control' ng-model='val'>";
-			$.each(column.options, function (key, val) {
-				select += "<option value='" + key + "'>" + val + "</option>";
-			});
-			return select + "</select>"
+			return "<select class='form-control' " +
+				"ng-model='val' " + " ng-options='key as value for " +
+				"(key, value) in col.options'></select>"
 		},
-		text: function () { return "<input type='text' class='form-control' ng-model='val' />" },
+		text: function () {
+			return "<input type='text' class='form-control' ng-model='val' />"
+		},
 		datePicker: function (scope) {
 			scope.dt = moment(scope.val).toDate();
 			scope.dateOptions = {

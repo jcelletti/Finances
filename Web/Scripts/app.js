@@ -29,7 +29,8 @@
 			callback($scope);
 
 			if (hasEdit) {
-				$scope.actionButtons.push({
+				$scope.actionButtons.unshift(0);
+				$scope.actionButtons[0] = {
 					text: "Edit",
 					visible: function (row) { return !row.isEditing; },
 					className: "btn-primary",
@@ -38,7 +39,8 @@
 						row.previous = {};
 						$.extend(row.previous, row.data);
 					}
-				});
+				};
+
 				$scope.actionButtons.push({
 					text: "Cancel",
 					visible: function (row) { return row.isEditing; },
