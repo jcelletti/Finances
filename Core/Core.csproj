@@ -67,7 +67,6 @@
     <Compile Include="Actions\Orm.Insert.cs" />
     <Compile Include="Actions\Orm.cs" />
     <Compile Include="Actions\Database.cs" />
-    <Compile Include="Classes\Constants.cs" />
     <Compile Include="Classes\Exceptions.cs" />
     <Compile Include="Classes\DbActions.cs" />
     <Compile Include="Classes\Payment.cs" />

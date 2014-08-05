@@ -16,13 +16,17 @@ namespace Core
 		public const string Top1 = "SELECT TOP 1 * FROM {0} WHERE {1} = {2}";
 		public const string Select = "SELECT * FROM {0}";
 
+		private static string ConnectionString { get; set; }
+
+		public const int _dbTimeout = 30;
+
 		public static IDbCommand GetCommand()
 		{
 			SqlCommand command = new SqlCommand();
-			SqlConnection conn = new SqlConnection(Constants._connectionString);
+			SqlConnection conn = new SqlConnection(DbActions.ConnectionString);
 			conn.Open();
 			command.Connection = conn;
-			command.CommandTimeout = Constants._dbTimeout;
+			command.CommandTimeout = DbActions._dbTimeout;
 
 			return command;
 		}
@@ -95,6 +99,11 @@ namespace Core
 			{
 				command.Parameters.Add(param);
 			}
+		}
+
+		public static void SetConnectionString(string connectionString)
+		{
+			DbActions.ConnectionString = connectionString;
 		}
 	}
 }
