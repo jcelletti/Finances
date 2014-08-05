@@ -73,7 +73,9 @@
 					text: "Payer",
 					format: function (format, value) {
 						return $scope.names[value];
-					}
+					},
+					editingTemplate: "select",
+					options: names
 				},
 				{ key: "Tip", text: "Tip" },
 				{ key: "Tax", text: "Tax" },

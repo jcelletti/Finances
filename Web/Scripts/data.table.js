@@ -12,6 +12,7 @@ angular.module("edit.data.table", [])
 		'<thead>' +
 			'<tr>' +
 				'<th ng-repeat="col in columns" ng-click="changeOrder(col.key)">' +
+					'<span class="glyphicon" ng-class="orderByClass(col)"></span>' +
 					'{{col.text}}' +
 				'</th>' +
 				'<th ng-show="actionButtons.length > 0">Actions</th>' +
@@ -20,8 +21,8 @@ angular.module("edit.data.table", [])
 		'<tbody>' +
 			'<tr ng-repeat="row in rows | orderBy: orderByFunction">' +
 				'<td ng-repeat="col in columns">' +
-					'<div ng-if="!row.isEditing">{{columnFormat(col, row)}}</div>' +
-					'<div ng-if="row.isEditing">' +
+					'<div ng-if="col.editable == false || !row.isEditing">{{columnFormat(col, row)}}</div>' +
+					'<div ng-if="col.editable != false && row.isEditing">' +
 						'<edit-control val="row.data[col.key]" col="col"></edit-control>' +
 					'</div>' +
 				'</td>' +
@@ -47,7 +48,7 @@ angular.module("edit.data.table", [])
 			add: '='
 		},
 		link: function (scope, elm, attrs) {
-			scope.changeOrder = function () {
+			scope.changeOrder = function (key) {
 				if (scope.orderByColumn === key) {
 					scope.orderByColumn = "-" + key
 				} else {
@@ -57,6 +58,15 @@ angular.module("edit.data.table", [])
 
 			scope.orderByFunction = function (row) {
 				return row.data[scope.orderByColumn];
+			};
+
+			scope.orderByClass = function (col) {
+				if (col.key === scope.orderByColumn) {
+					return 'glyphicon-chevron-up';
+				} else if ("-" + col.key === scope.orderByColumn) {
+					return "glyphicon-chevron-down";
+				}
+				return ""
 			};
 
 			scope.rowEdit = function (column) {
@@ -86,7 +96,8 @@ angular.module("edit.data.table", [])
 })
 .directive("editControl", function ($compile) {
 	var templates = {
-		select: function (scope, row, column) {
+		select: function (scope) {
+			var column = scope.col;
 			var select = "<select class='form-control' ng-model='val'>";
 			$.each(column.options, function (key, val) {
 				select += "<option value='" + key + "'>" + val + "</option>";

@@ -31,7 +31,7 @@
 				{ key: "Month", text: "Month", formatString: "LL", format: rent.formats.date, editingTemplate: "datePicker" }
 			];
 
-			$scope.orderByColumn = "Name";
+			$scope.orderByColumn = $scope.columns[0].key;
 
 			$scope.actionButtons = [
 						{
