@@ -1149,6 +1149,7 @@
     <Content Include="Scripts\jquery-2.1.3.min.map" />
     <Content Include="Views\SPA\_Layout.cshtml" />
     <Content Include="Views\SPA\Index.cshtml" />
+    <Content Include="Web.config.template" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
