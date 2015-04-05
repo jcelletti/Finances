@@ -213,9 +213,13 @@
     <Content Include="Content\site.min.css">
       <DependentUpon>site.css</DependentUpon>
     </Content>
+    <Content Include="Content\SPA.css">
+      <DependentUpon>SPA.less</DependentUpon>
+    </Content>
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\site.less" />
+    <Content Include="Content\fonts\glyphicons-halflings-regular.woff2" />
     <Content Include="Content\fonts\glyphicons-halflings-regular.woff" />
     <Content Include="Content\fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="Content\fonts\glyphicons-halflings-regular.eot" />
@@ -289,9 +293,7 @@
     <Content Include="Content\bootstrap\bootstrap.less" />
     <Content Include="Content\bootstrap\badges.less" />
     <Content Include="Content\bootstrap\alerts.less" />
-    <Content Include="Content\site.css.map">
-      <DependentUpon>site.css</DependentUpon>
-    </Content>
+    <Content Include="Content\SPA.less" />
     <None Include="Properties\PublishProfiles\JCellettiLocal.pubxml" />
     <None Include="Properties\PublishProfiles\Rent.pubxml" />
     <Content Include="Scripts\angular-animate.js" />
