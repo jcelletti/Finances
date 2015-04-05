@@ -1,15 +1,19 @@
 ﻿using System.Web;
 using System.Web.Optimization;
 
-namespace Web {
-	public class BundleConfig {
+namespace Web
+{
+	public class BundleConfig
+	{
 		// For more information on Bundling, visit http://go.microsoft.com/fwlink/?LinkId=254725
-		public static void RegisterBundles(BundleCollection bundles) {
+		public static void RegisterBundles(BundleCollection bundles)
+		{
 			BundleConfig.RegisterScripts(bundles);
 			BundleConfig.RegisterStyles(bundles);
 		}
 
-		private static void RegisterScripts(BundleCollection bundles) {
+		private static void RegisterScripts(BundleCollection bundles)
+		{
 			bundles.Add(new ScriptBundle("~/bundles/jquery")
 				.Include("~/Scripts/jquery-{version}.js"));
 
@@ -28,17 +32,19 @@ namespace Web {
 
 			bundles.Add(new ScriptBundle("~/bundles/Angularjs")
 				.Include("~/Scripts/angular.js",
-						"~/Scripts/ui-bootstrap-{version}.js",
-						"~/Scripts/data.table.js"));
+						"~/Scripts/angular-ui/ui-bootstrap.js",
+						"~/Scripts/angular-ui/ui-bootstrap-tpls.js"));
 
 			bundles.Add(new ScriptBundle("~/bundles/Sitejs")
-				.Include("~/Scripts/app.js"));
+				.Include("~/Scripts/data.table.js",
+				"~/Scripts/app.js"));
 
 			bundles.Add(new ScriptBundle("~/Scripts/SpaBundle")
 				.Include("~/Scripts/SPA.js"));
 		}
 
-		private static void RegisterStyles(BundleCollection bundles) {
+		private static void RegisterStyles(BundleCollection bundles)
+		{
 			bundles.Add(new StyleBundle("~/Content/css")
 				.Include("~/Content/site.css"));
 

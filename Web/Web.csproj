@@ -317,6 +317,10 @@
     <Content Include="Scripts\angular-scenario.js" />
     <Content Include="Scripts\angular-touch.js" />
     <Content Include="Scripts\angular-touch.min.js" />
+    <Content Include="Scripts\angular-ui\ui-bootstrap-tpls.js" />
+    <Content Include="Scripts\angular-ui\ui-bootstrap-tpls.min.js" />
+    <Content Include="Scripts\angular-ui\ui-bootstrap.js" />
+    <Content Include="Scripts\angular-ui\ui-bootstrap.min.js" />
     <Content Include="Scripts\angular.js" />
     <Content Include="Scripts\angular.min.js" />
     <Content Include="Scripts\app.js" />
@@ -1088,7 +1092,6 @@
     <Content Include="Scripts\moment.js" />
     <Content Include="Scripts\moment.min.js" />
     <Content Include="Scripts\SPA.js" />
-    <Content Include="Scripts\ui-bootstrap-0.11.0.js" />
     <Content Include="template\accordion\accordion-group.html" />
     <Content Include="template\accordion\accordion.html" />
     <Content Include="template\alert\alert.html" />
@@ -1195,7 +1198,6 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>53077</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
