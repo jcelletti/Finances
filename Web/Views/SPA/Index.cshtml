@@ -3,7 +3,9 @@
 	this.ViewBag.Title = "Rent";
 }
 
-<h2>Index</h2>
+<div ng-if="Contents.RentsLoaded && Contents.RentersLoaded">
+	<spa-dynamic template="Contents.Template"></spa-dynamic>
+</div>
 
 <!--
 	add function to get all users and store them in a central location

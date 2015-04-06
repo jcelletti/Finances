@@ -1,0 +1,34 @@
+﻿<div>
+	<table class="table table-striped table-bordered">
+		<thead>
+			<tr>
+				<th>
+					<span>Selected</span>
+				</th>
+				<th ng-repeat="c in columns | filter: {Visible: true}">
+					<span ng-bind="c.Title"></span>
+				</th>
+				<th>
+					<span>Actions</span>
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="row in Contents.Rows">
+				<td>
+					<input type="checkbox" ng-model="row.Selected" />
+				</td>
+				<td ng-repeat="c in columns | filter: {Visible: true}" spa-dynamic template="c.Template" hash="{row: row, column: c}"></td>
+				<td>
+					<div class="btn-group">
+						<button ng-repeat="btn in actions" type="button" class="btn btn-primary" ng-bind="btn.Text" ng-click="btn.Click(row)"></button>
+
+						<button type="button" class="btn btn-default" ng-if="!row.IsEditing" ng-click="row.IsEditing=true">Edit</button>
+						<button type="button" class="btn btn-default" ng-if="row.IsEditing" ng-click="row.IsEditing=false">Cancel</button>
+						<button type="button" class="btn btn-default" ng-if="row.IsEditing" ng-click="row.IsEditing=true">Save</button>
+					</div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>

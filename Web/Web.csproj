@@ -15,7 +15,7 @@
     <AssemblyName>Web</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
-    <UseIISExpress>false</UseIISExpress>
+    <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
@@ -296,6 +296,9 @@
     <Content Include="Content\SPA.less" />
     <None Include="Properties\PublishProfiles\JCellettiLocal.pubxml" />
     <None Include="Properties\PublishProfiles\Rent.pubxml" />
+    <Content Include="NgTemplates\DataGrid\dg-date-time.html" />
+    <Content Include="NgTemplates\DataGrid\spa-data-grid.html" />
+    <Content Include="NgTemplates\spa-rents.html" />
     <Content Include="Scripts\angular-animate.js" />
     <Content Include="Scripts\angular-animate.min.js" />
     <Content Include="Scripts\angular-aria.js" />
@@ -1198,6 +1201,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
+          <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>53077</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
