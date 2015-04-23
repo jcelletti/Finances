@@ -3,29 +3,28 @@
 		<thead>
 			<tr>
 				<th>
-					<span>Selected</span>
 				</th>
 				<th ng-repeat="c in columns | filter: {Visible: true}">
 					<span ng-bind="c.Title"></span>
 				</th>
-				<th>
+				<th ng-if="Contents.ShowActions" ng-style="{width: Contents.ButtonWidth}">
 					<span>Actions</span>
 				</th>
 			</tr>
 		</thead>
 		<tbody>
 			<tr ng-repeat="row in Contents.Rows">
-				<td>
-					<input type="checkbox" ng-model="row.Selected" />
+				<td width="150px">
+					<button type="button" class="btn btn-default" ng-if="!row.IsEditing" ng-click="row.SetEditing()">Edit</button>
+					<div class="btn-group" ng-if="row.IsEditing">
+						<button type="button" class="btn btn-default" ng-click="row.IsEditing=false">Save</button>
+						<button type="button" class="btn btn-default" ng-click="row.CancelEdit();">Cancel</button>
+					</div>
 				</td>
 				<td ng-repeat="c in columns | filter: {Visible: true}" spa-dynamic template="c.Template" hash="{row: row, column: c}"></td>
-				<td>
+				<td ng-if="Contents.ShowActions">
 					<div class="btn-group">
 						<button ng-repeat="btn in actions" type="button" class="btn btn-primary" ng-bind="btn.Text" ng-click="btn.Click(row)"></button>
-
-						<button type="button" class="btn btn-default" ng-if="!row.IsEditing" ng-click="row.IsEditing=true">Edit</button>
-						<button type="button" class="btn btn-default" ng-if="row.IsEditing" ng-click="row.IsEditing=false">Cancel</button>
-						<button type="button" class="btn btn-default" ng-if="row.IsEditing" ng-click="row.IsEditing=true">Save</button>
 					</div>
 				</td>
 			</tr>

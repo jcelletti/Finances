@@ -29,7 +29,9 @@ SPA.Config = function () {
 			string: 'string',
 			Date: 'date',
 			Time: 'time',
-			DateTime: 'dateTime'
+			DateTime: 'dateTime',
+			Renters: 'renters',
+			Rents: 'rents'
 		},
 		DateFormats: {
 			Day: 'MMMM DD, YYYY',
@@ -46,8 +48,8 @@ SPA.Config = function () {
 
 angular.module('SPA', ['SPA.Extensions', 'SPA.Data.Grid'])
 	.directive('spaMain', [
-		'spaModals', 'Renters', 'Rents',
-		function (modals, renters, rents) {
+		'spaModals', 'Renters', 'Rents', 'spaLocation',
+		function (modals, renters, rents, locationManager) {
 			return {
 				restrict: 'A',
 				replace: false,
@@ -59,9 +61,9 @@ angular.module('SPA', ['SPA.Extensions', 'SPA.Data.Grid'])
 				],
 				compile: function () {
 					return {
-						pre: function (scope) {
+						pre: function (scope, element) {
 							scope.Contents = {
-								Template: 'spa-rents',
+								Template: null,
 								RentsLoaded: false,
 								RentersLoaded: false
 							};
@@ -74,6 +76,9 @@ angular.module('SPA', ['SPA.Extensions', 'SPA.Data.Grid'])
 								scope.Contents.RentsLoaded = true;
 							});
 
+							locationManager.Initialize(scope, element, function (template) {
+								scope.Contents.Template = 'spa-' + template;
+							});
 						},
 						post: function (scope) {
 						}
@@ -83,8 +88,8 @@ angular.module('SPA', ['SPA.Extensions', 'SPA.Data.Grid'])
 		}
 	])
 	.directive('spaRents', [
-		'Rents', 'dgColumn', 'dgFunction',
-		function (rents, Column, Function) {
+		'Rents', 'dgColumn', 'dgFunction', 'spaLocation',
+		function (rents, Column, Function, lm) {
 			return {
 				restrict: 'E',
 				replace: true,
@@ -96,12 +101,12 @@ angular.module('SPA', ['SPA.Extensions', 'SPA.Data.Grid'])
 								Rents: rents.Get(),
 								Actions: [
 									new Function('Receipts', function (row) {
-										//navigate to receipts
-										console.log('go to receipts', row.Data.Id);
+										lm.SetParam(lm.Parameters.rent, row.Data.Id);
+										lm.SetLocation(lm.Pages.reciepts);
 									}),
 									new Function('Payments', function (row) {
-										//navigate to payments
-										console.log('go to payments', row.Data.Id);
+										lm.SetParam(lm.Parameters.rent, row.Data.Id);
+										lm.SetLocation(lm.Pages.payments);
 									}),
 								],
 								Columns: [
@@ -125,6 +130,213 @@ angular.module('SPA', ['SPA.Extensions', 'SPA.Data.Grid'])
 				}
 			};
 		}
+	])
+	.directive('spaReceipts', [
+		'HttpGet', 'dgColumn', 'dgFunction', 'spaLocation',
+		function (get, Column, Function, lm) {
+			return {
+				restrict: 'E',
+				replace: true,
+				transclude: true,
+				compile: function () {
+					return {
+						pre: function (scope) {
+							scope.Contents = {
+								Receipts: [],
+								Actions: [
+									new Function('Payments', function (row) {
+										lm.SetParam(lm.Parameters.receipt, row.Data.Id);
+										lm.SetLocation(lm.Pages.payments);
+									})
+								],
+								Columns: [
+									new Column({
+										binding: 'Name',
+										visible: true
+									}),
+									new Column({
+										title: 'Month',
+										binding: 'Date',
+										visible: true,
+										dataType: SPA.Config.DataTypes.Date,
+										dateFormat: SPA.Config.DateFormats.Day
+									}),
+									new Column({
+										binding: 'Tip',
+										visible: true
+									}),
+									new Column({
+										binding: 'Tax',
+										visible: true
+									}),
+									new Column({
+										binding: 'Total',
+										visible: true
+									}),
+								]
+							};
+
+							get.Receipts(lm.GetParam(lm.Parameters.rent))
+								.then(function (receipts) {
+									scope.Contents.Receipts = receipts;
+								});
+						}
+					};
+				},
+				templateUrl: SPA.Template('spa-receipts'),
+				scope: {
+				}
+			}
+		}
+	])
+	.directive('spaPayments', [
+		'HttpGet', 'dgColumn', 'dgFunction', 'spaLocation',
+		function (get, Column, Function, lm) {
+			return {
+				restrict: 'E',
+				replace: true,
+				transclude: true,
+				compile: function () {
+					return {
+						pre: function (scope) {
+							scope.Contents = {
+								Payments: [],
+								Actions: [],
+								Columns: [
+									new Column({
+										binding: 'Tip',
+										visible: true
+									}),
+									new Column({
+										binding: 'Tax',
+										visible: true
+									}),
+									new Column({
+										title: 'Total',
+										binding: 'Amount',
+										visible: true
+									}),
+									new Column({
+										title: 'Payer',
+										binding: 'Payer',
+										dataType: SPA.Config.DataTypes.Renters,
+										visible: true
+									})
+								]
+							};
+
+							get.Payments(lm.GetParam(lm.Parameters.receipt), lm.GetParam(lm.Parameters.rent))
+								.then(function (payments) {
+									scope.Contents.Payments = payments;
+								});
+						}
+					};
+				},
+				templateUrl: SPA.Template('spa-payments'),
+				scope: {
+				}
+			}
+		}
+	])
+	.service('spaLocation', [
+		'$location',
+		function ($location) {
+			var svc = this;
+
+			//todo: add breadcrumbs
+
+			var pages = {
+				rents: 'rents',
+				reciepts: 'receipts',
+				payments: 'payments'
+			};
+
+			svc.Pages = pages;
+
+			svc.Parameters = {
+				rent: 'rent-id',
+				receipt: 'reciept-id'
+			};
+
+			var pageHash = {};
+
+			$.each(pages, function (key, val) {
+				pageHash[key] = '/' + val;
+			});
+
+			var currentLocation = function () {
+				switch ($location.path()) {
+					case pageHash.reciepts:
+						return pages.reciepts;
+					case pageHash.payments:
+						return pages.payments;
+					case pageHash.rents:
+					default:
+						return pages.rents;
+				}
+			};
+
+			var pageToLocation = function (page) {
+				switch (page) {
+					case pages.reciepts:
+						return pageHash.reciepts;
+					case pages.payments:
+						return pageHash.payments;
+					case pages.rents:
+					default:
+						return pageHash.rents;
+				}
+			};
+
+			var getPage = function (template, text) {
+				return {
+					template: template,
+					text: text
+				};
+			};
+
+			//svc.Pages = function () {
+			//	return [
+			//		getPage(pageHash.rents),
+			//		getPage(pageHash.reciepts),
+			//		getPage(pageHash.payments)
+			//	];
+			//};
+
+			svc.Initialize = function (scope, element, templateChangeCallback) {
+				var onWatch = scope.$on('$locationChangeSuccess', function () {
+					scope.Contents.loading = true;
+					templateChangeCallback(currentLocation());
+				});
+
+				element.on('$destroy', function () {
+					onWatch();
+				});
+
+				$location.path(currentLocation());
+			};
+
+			svc.SetLocation = function (tabName) {
+				$location.path(pageToLocation(tabName));
+			};
+
+			svc.SetParam = function (key, value) {
+				var trimVal = $.trim(value);
+
+				var hash = $location.search();
+				if (trimVal.length === 0) {
+					hash[key] = null;
+				} else {
+					hash[key] = trimVal;
+				};
+
+				$location.search(hash);
+			};
+
+			svc.GetParam = function (key) {
+				return $location.search()[key];
+			};
+		}
 	]);
 
 angular.module('SPA.models', [])
@@ -137,6 +349,8 @@ angular.module('SPA.models', [])
 
 				r.First = renter.first;
 				r.Last = renter.last;
+
+				r.FullName = renter.fullName;
 			}
 		})
 	.factory('Rent',
@@ -148,6 +362,35 @@ angular.module('SPA.models', [])
 				r.Name = rent.name
 				r.Date = new moment(rent.month);
 			}
+		})
+	.factory('Receipt',
+		function () {
+			return function (receipt) {
+				var r = this;
+
+				r.Id = receipt.id;
+				r.RentId = receipt.rentId;
+
+				r.Name = receipt.name;
+				r.Date = new moment(receipt.date);
+				r.Tip = receipt.tip;
+				r.Tax = receipt.tax;
+				r.Total = receipt.total;
+			}
+		})
+	.factory('Payment',
+		function () {
+			return function (payment) {
+				var p = this;
+
+				p.Id = payment.id;
+				p.ReceiptId = payment.receiptId;
+
+				p.Payer = payment.payer;
+				p.Tax = payment.tax;
+				p.Tip = payment.tip;
+				p.Amount = payment.paymentAmount;
+			};
 		});
 
 angular.module('SPA.Extensions', ['ui.bootstrap', 'SPA.HTTP'])
@@ -161,11 +404,19 @@ angular.module('SPA.Extensions', ['ui.bootstrap', 'SPA.HTTP'])
 		'HttpGet',
 		function (get) {
 			var renters = [];
+			var hash = {};
 
 			var reset = function (callback) {
 				get.Renters()
 					.then(function (result) {
 						renters = result;
+
+						hash = {};
+
+						$.each(renters, function (i, r) {
+							hash[r.Id] = r;
+						});
+
 
 						if ($.isFunction(callback)) {
 							callback(renters);
@@ -179,6 +430,9 @@ angular.module('SPA.Extensions', ['ui.bootstrap', 'SPA.HTTP'])
 				},
 				Get: function () {
 					return renters;
+				},
+				GetHash: function () {
+					return hash;
 				}
 			};
 		}
@@ -207,7 +461,6 @@ angular.module('SPA.Extensions', ['ui.bootstrap', 'SPA.HTTP'])
 					return rents;
 				}
 			};
-
 		}
 	])
 	.directive('spaDynamic', [
@@ -252,7 +505,27 @@ angular.module('SPA.Extensions', ['ui.bootstrap', 'SPA.HTTP'])
 				}
 			};
 		}
-	]);
+	])
+	.directive('spaAttrs',
+		function () {
+			return {
+				restrict: 'A',
+				replace: false,
+				transclude: false,
+				compile: function () {
+					return {
+						pre: function (scope, element) {
+							$.each(scope.attrs, function (key, val) {
+								element.attr(key, val);
+							});
+						}
+					};
+				},
+				scope: {
+					attrs: '=spaAttrs'
+				}
+			};
+		});
 
 angular.module('SPA.HTTP', ['ui.bootstrap', 'SPA.models'])
 	.config([
@@ -267,7 +540,7 @@ angular.module('SPA.HTTP', ['ui.bootstrap', 'SPA.models'])
 							return $q.reject(r);
 						},
 						responseError: function (r) {
-							console.log(r);
+							//console.log(r);
 
 							return $q.reject(r);
 						}
@@ -310,8 +583,8 @@ angular.module('SPA.HTTP', ['ui.bootstrap', 'SPA.models'])
 		}
 	])
 	.service('HttpGet', [
-		'$http', 'HttpDefer', 'Renter', 'Rent',
-		function ($http, Defer, Renter, Rent) {
+		'$http', 'HttpDefer', 'Renter', 'Rent', 'Receipt', 'Payment',
+		function ($http, Defer, Renter, Rent, Receipt, Payment) {
 			var svc = this;
 
 			svc.Renters = function () {
@@ -324,6 +597,37 @@ angular.module('SPA.HTTP', ['ui.bootstrap', 'SPA.models'])
 				return new Defer(function () {
 					return $http.get('Rent');
 				}, Rent);
+			};
+
+			svc.Receipts = function (rentId) {
+				return new Defer(function () {
+					var url = 'Receipt';
+
+					var tRentId = $.trim(rentId);
+
+					if (tRentId.length > 0) {
+						url += '/' + tRentId + '/ByRent';
+					};
+
+					return $http.get(url);
+				}, Receipt)
+			};
+
+			svc.Payments = function (receiptId, rentId) {
+				return new Defer(function () {
+					var url = 'Payment';
+
+					var tReceiptId = $.trim(receiptId);
+					var tRentId = $.trim(rentId);
+
+					if (tReceiptId.length > 0) {
+						url += '/' + tReceiptId + '/ByReceipt';
+					} else if (tRentId.length > 0) {
+						url += '/' + tRentId + '/ByRent';
+					};
+
+					return $http.get(url);
+				}, Payment);
 			};
 		}
 	])
@@ -346,7 +650,7 @@ angular.module('SPA.HTTP', ['ui.bootstrap', 'SPA.models'])
 		}
 	]);
 
-angular.module('SPA.Data.Grid', [])
+angular.module('SPA.Data.Grid', ['SPA.Extensions'])
 	.directive('spaDataGrid', [
 		'dgRow',
 		function (Row) {
@@ -358,7 +662,9 @@ angular.module('SPA.Data.Grid', [])
 					return {
 						pre: function (scope, element) {
 							scope.Contents = {
-								Rows: []
+								Rows: [],
+								ButtonWidth: 100 * scope.actions.length + 'px',
+								ShowActions: scope.actions.length > 0
 							};
 
 							var watcher = scope.$watch('data.length', function () {
@@ -396,17 +702,39 @@ angular.module('SPA.Data.Grid', [])
 				r.Selected = false;
 				r.IsEditing = false;
 				r.Data = data;
+
+				var previous = {};
+				r.SetEditing = function () {
+					previous = {};
+
+					$.extend(previous, r.Data);
+
+					r.IsEditing = true;
+				};
+
+				r.CancelEdit = function () {
+					var cancelData = {};
+
+					$.extend(cancelData, previous);
+
+					previous = {};
+
+					r.Data = cancelData;
+
+					r.IsEditing = false;
+				};
 			};
 		})
 	.factory('dgColumn',
 		function () {
-
 			var getTemplate = function (dt) {
 				switch (dt) {
 					case SPA.Config.DataTypes.Date:
 					case SPA.Config.DataTypes.Time:
 					case SPA.Config.DataTypes.DateTime:
 						return 'date-time';
+					case SPA.Config.DataTypes.Renters:
+						return 'renters';
 					case SPA.Config.DataTypes.String:
 					default:
 						return 'string';
@@ -440,6 +768,13 @@ angular.module('SPA.Data.Grid', [])
 				var f = this;
 
 				f.Text = text;
+				if (!$.isFunction(callback)) {
+					callback = function () {
+						alert('The function for this event was never set. See console for more info');
+						console.error('The callback function was never set', f);
+					};
+				};
+
 				f.Click = callback;
 			}
 		}
@@ -453,7 +788,9 @@ angular.module('SPA.Data.Grid', [])
 				compile: function () {
 					return {
 						pre: function (scope) {
-
+							scope.Contents = {
+								Value: scope.row.Data[scope.column.Binding]
+							};
 						},
 						post: function (scope) {
 
@@ -474,10 +811,27 @@ angular.module('SPA.Data.Grid', [])
 				replace: true,
 				transclude: true,
 				compile: function () {
+					var getOptions = function (col) {
+						var format = 'day';
+
+						if (col.DateFormat === SPA.Config.DateFormats.Month) {
+							format = 'month'
+						} else if (col.DateFormat === SPA.Config.DateFormats.Year) {
+							format = 'year';
+						};
+
+						return {
+							Mode: format,
+							PickerOptions: {}
+						};
+					};
+
 					return {
 						pre: function (scope) {
 							scope.Contents = {
-								Format: scope.row.Data[scope.column.Binding].format(scope.column.DateFormat)
+								Format: scope.row.Data[scope.column.Binding].format(scope.column.DateFormat),
+								EditValue: scope.row.Data[scope.column.Binding].clone(),
+								Options: getOptions(scope.column)
 							};
 						},
 						post: function (scope) {
@@ -491,4 +845,38 @@ angular.module('SPA.Data.Grid', [])
 					column: '='
 				}
 			};
-		});
+		})
+	.directive('dgRenters', [
+		'Renters',
+		function (renters) {
+			return {
+				restrict: 'E',
+				replace: true,
+				transclude: true,
+				compile: function () {
+					return {
+						pre: function (scope) {
+							scope.Contents = {
+								Name: null,
+								Value: null,
+								Renters: renters.GetHash()
+							};
+
+							scope.Contents.Value = scope.row.Data[scope.column.Binding];
+							scope.Contents.Name = scope.Contents.Renters[scope.Contents.Value].FullName
+
+							//todo: update on change
+						},
+						post: function (scope) {
+
+						}
+					};
+				},
+				templateUrl: SPA.Template('dg-renters', 'DataGrid'),
+				scope: {
+					row: '=',
+					column: '='
+				}
+			};
+		}
+	]);

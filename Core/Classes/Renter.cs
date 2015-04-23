@@ -23,7 +23,6 @@ namespace Core.Classes
 		[Orm("Last")]
 		public string Last { get; set; }
 
-		[JsonIgnore]
 		public string FullName
 		{
 			get { return string.Format("{0} {1}", this.First, this.Last); }

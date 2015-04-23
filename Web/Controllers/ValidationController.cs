@@ -125,7 +125,6 @@ namespace Web.Controllers
 			}
 			if (receipt.Tax != tax)
 			{
-
 				throw new InvalidTaxException(receipt, tax);
 			}
 		}

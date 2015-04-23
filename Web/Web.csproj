@@ -296,8 +296,12 @@
     <Content Include="Content\SPA.less" />
     <None Include="Properties\PublishProfiles\JCellettiLocal.pubxml" />
     <None Include="Properties\PublishProfiles\Rent.pubxml" />
+    <Content Include="NgTemplates\DataGrid\dg-renters.html" />
+    <Content Include="NgTemplates\DataGrid\dg-string.html" />
     <Content Include="NgTemplates\DataGrid\dg-date-time.html" />
     <Content Include="NgTemplates\DataGrid\spa-data-grid.html" />
+    <Content Include="NgTemplates\spa-payments.html" />
+    <Content Include="NgTemplates\spa-receipts.html" />
     <Content Include="NgTemplates\spa-rents.html" />
     <Content Include="Scripts\angular-animate.js" />
     <Content Include="Scripts\angular-animate.min.js" />

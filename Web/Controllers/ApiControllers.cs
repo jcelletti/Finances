@@ -6,8 +6,10 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Filters;
 
+using Core;
 using Core.Actions;
 using Core.Classes;
+using Web.Models;
 
 namespace Web.ApiControllers
 {
@@ -84,6 +86,95 @@ namespace Web.ApiControllers
 			return this.Ok(Database.GetAll<Rent>());
 		}
 
+		[HttpGet]
+		[Route("{id:guid}/Validate")]
+		public IHttpActionResult Validate(Guid id)
+		{
+			List<RentValidationModel> validated = new List<RentValidationModel>();
+
+			IEnumerable<Receipt> receipts = Database.GetAllByRent<Receipt>(id);
+
+			Dictionary<Guid, decimal> owed = new Dictionary<Guid, decimal>();
+
+			foreach (var receipt in receipts)
+			{
+				this.ValidateReceipt(receipt);
+
+				if (!owed.ContainsKey(receipt.Payer)) { owed.Add(receipt.Payer, 0); }
+
+				IEnumerable<Payment> payments = Database.GetPaymentsByReceipt(receipt.Id);
+
+				decimal pmtReduction = 0;
+
+				foreach (var pmt in payments)
+				{
+					if (!owed.ContainsKey(pmt.Payer)) { owed.Add(pmt.Payer, 0); }
+
+					if (pmt.Payer == receipt.Payer) { continue; }
+					var payeeTotal = pmt.PaymentAmount + pmt.Tip + pmt.Tax;
+
+					pmtReduction += payeeTotal;
+
+					owed[pmt.Payer] += payeeTotal;
+				}
+
+				owed[receipt.Payer] -= pmtReduction;
+			}
+
+			decimal sum = 0;
+
+			foreach (var key in owed.Keys)
+			{
+				Renter renter = Database.Get<Renter>(key);
+				validated.Add(new RentValidationModel(key, renter.FullName, owed[key]));
+				sum += owed[key];
+			}
+
+			if (sum != 0)
+			{
+				throw new InvalidRentSumException(validated);
+			}
+
+			return this.Ok(validated);
+		}
+
+		private void ValidateReceipt(Receipt receipt)
+		{
+			IEnumerable<Payment> payments = Database.GetPaymentsByReceipt(receipt.Id);
+
+			decimal total = 0;
+			decimal tip = 0;
+			decimal tax = 0;
+
+			foreach (var pmt in payments)
+			{
+				total += pmt.PaymentAmount;
+				tip += pmt.Tip;
+				tax += pmt.Tax;
+			}
+
+			tip = Math.Round(tip, 2);
+
+			tax = Math.Round(tax, 2);
+
+			total += tip + tax;
+
+			total = Math.Round(total, 2);
+
+			if (receipt.Total != total)
+			{
+				throw new InvalidTotalException(receipt, total);
+			}
+			if (receipt.Tip != tip)
+			{
+				throw new InvalidTipException(receipt, tip);
+			}
+			if (receipt.Tax != tax)
+			{
+				throw new InvalidTaxException(receipt, tax);
+			}
+		}
+
 		[HttpPost]
 		[Route("")]
 		public IHttpActionResult RentAdd()
@@ -153,10 +244,10 @@ namespace Web.ApiControllers
 		}
 
 		[HttpGet]
-		[Route("{paymentId:guid}/ByPayment")]
-		public IHttpActionResult ByPayment(Guid paymentId)
+		[Route("{receiptId:guid}/ByReceipt")]
+		public IHttpActionResult ByReceipt(Guid receiptId)
 		{
-			return this.Ok(Database.GetPaymentsByReceipt(paymentId));
+			return this.Ok(Database.GetPaymentsByReceipt(receiptId));
 		}
 	}
 }
