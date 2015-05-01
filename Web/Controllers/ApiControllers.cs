@@ -83,7 +83,7 @@ namespace Web.ApiControllers
 		[Route("")]
 		public IHttpActionResult All()
 		{
-			return this.Ok(Database.GetAll<Rent>());
+			return this.Ok(Database.GetAll<Rent>().OrderBy(r => r.Month));
 		}
 
 		[HttpGet]
@@ -177,7 +177,7 @@ namespace Web.ApiControllers
 
 		[HttpPost]
 		[Route("")]
-		public IHttpActionResult RentAdd()
+		public IHttpActionResult Add()
 		{
 			var rent = new Rent
 			{
@@ -193,7 +193,7 @@ namespace Web.ApiControllers
 
 		[HttpPut]
 		[Route("")]
-		public IHttpActionResult RentUpdate(Rent rent)
+		public IHttpActionResult Update(Rent rent)
 		{
 			Database.Update(rent);
 			return this.Ok(Database.Get<Rent>(rent.Id));
@@ -201,7 +201,7 @@ namespace Web.ApiControllers
 
 		[HttpDelete]
 		[Route("{id:guid}")]
-		public IHttpActionResult RentDelete(Guid id)
+		public IHttpActionResult Delete(Guid id)
 		{
 			Database.Delete<Rent>(id);
 			return this.Ok();
@@ -215,14 +215,98 @@ namespace Web.ApiControllers
 		[Route("")]
 		public IHttpActionResult All()
 		{
-			return this.Ok(Database.GetAll<Receipt>());
+			return this.Ok(Database.GetAll<Receipt>().OrderBy(r => r.Date));
 		}
 
 		[HttpGet]
 		[Route("{rentId:guid}/ByRent")]
 		public IHttpActionResult GetByRent(Guid rentId)
 		{
-			return this.Ok(Database.GetAllByRent<Receipt>(rentId));
+			return this.Ok(Database.GetAllByRent<Receipt>(rentId).OrderBy(r => r.Date));
+		}
+
+		[HttpGet]
+		[Route("{id:guid}/Validate")]
+		public IHttpActionResult Validate(Guid id)
+		{
+			Receipt receipt = Database.Get<Receipt>(id);
+
+			this.ValidateReceipt(receipt);
+
+			return this.Ok();
+		}
+
+		[HttpPost]
+		[Route("{rentId:guid}")]
+		public IHttpActionResult Add(Guid rentId)
+		{
+			var receipt = new Receipt
+				{
+					Id = Guid.NewGuid(),
+					Name = "New Receipt",
+					Date = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1),
+					Tip = 0,
+					Total = 0,
+					Payer = Database.First<Renter>().Id,
+					RentId = (rentId == Guid.Empty) ? Database.First<Rent>().Id : rentId
+				};
+
+			Database.Insert(receipt);
+
+			return this.Ok(Database.Get<Receipt>(receipt.Id));
+		}
+
+		[HttpPut]
+		[Route("")]
+		public IHttpActionResult Update(Receipt receipt)
+		{
+			Database.Update(receipt);
+			return this.Ok(Database.Get<Receipt>(receipt.Id));
+		}
+
+		[HttpDelete]
+		[Route("{id:guid}")]
+		public IHttpActionResult Delete(Guid id)
+		{
+			Database.Delete<Receipt>(id);
+			return this.Ok();
+		}
+
+		private void ValidateReceipt(Receipt receipt)
+		{
+			IEnumerable<Payment> payments = Database.GetPaymentsByReceipt(receipt.Id);
+
+			decimal total = 0;
+			decimal tip = 0;
+			decimal tax = 0;
+
+			foreach (var pmt in payments)
+			{
+				total += pmt.PaymentAmount;
+				tip += pmt.Tip;
+				tax += pmt.Tax;
+			}
+
+			tip = Math.Round(tip, 2);
+
+			tax = Math.Round(tax, 2);
+
+			total += tip + tax;
+
+			total = Math.Round(total, 2);
+
+			if (receipt.Total != total)
+			{
+				throw new InvalidTotalException(receipt, total);
+			}
+			if (receipt.Tip != tip)
+			{
+				throw new InvalidTipException(receipt, tip);
+			}
+			if (receipt.Tax != tax)
+			{
+				throw new InvalidTaxException(receipt, tax);
+			}
 		}
 	}
 
@@ -233,7 +317,7 @@ namespace Web.ApiControllers
 		[Route("")]
 		public IHttpActionResult All()
 		{
-			return this.Ok(Database.GetAll<Payment>());
+			return this.Ok(Database.GetAll<Payment>().OrderBy(p => p.Payer));
 		}
 
 		[HttpGet]
@@ -248,6 +332,34 @@ namespace Web.ApiControllers
 		public IHttpActionResult ByReceipt(Guid receiptId)
 		{
 			return this.Ok(Database.GetPaymentsByReceipt(receiptId));
+		}
+
+		[HttpPost]
+		[Route("{receiptId:guid}")]
+		public IHttpActionResult Add(Guid receiptId)
+		{
+			var payment = new Payment
+			{
+				Id = Guid.NewGuid(),
+				PaymentAmount = 0,
+				Tip = 0,
+				Tax = 0,
+				ReceiptId = receiptId,
+				Payer = Database.First<Renter>().Id
+			};
+
+			payment.Payer = Database.First<Renter>().Id;
+			Database.Insert(payment);
+
+			return this.Ok(Database.Get<Payment>(payment.Id));
+		}
+
+		[HttpDelete]
+		[Route("{id:guid}")]
+		public IHttpActionResult Delete(Guid id)
+		{
+			Database.Delete<Payment>(id);
+			return this.Ok();
 		}
 	}
 }

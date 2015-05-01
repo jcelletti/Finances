@@ -297,7 +297,7 @@
     <None Include="Properties\PublishProfiles\JCellettiLocal.pubxml" />
     <None Include="Properties\PublishProfiles\Rent.pubxml" />
     <Content Include="NgTemplates\DataGrid\dg-renters.html" />
-    <Content Include="NgTemplates\DataGrid\dg-string.html" />
+    <Content Include="NgTemplates\DataGrid\dg-input.html" />
     <Content Include="NgTemplates\DataGrid\dg-date-time.html" />
     <Content Include="NgTemplates\DataGrid\spa-data-grid.html" />
     <Content Include="NgTemplates\spa-payments.html" />

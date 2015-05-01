@@ -4,3 +4,4 @@ Web/bin/
 Web/obj/
 Web/Web.config
 *.user
+*.suo

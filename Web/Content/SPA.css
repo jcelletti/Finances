@@ -6553,3 +6553,57 @@ body {
 .spa-content {
   padding: 40px;
 }
+/*Data Grid*/
+.spa-data-grid {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 20px;
+  border: 1px solid #dddddd;
+}
+.spa-data-grid > thead > tr > th,
+.spa-data-grid > tbody > tr > th,
+.spa-data-grid > tfoot > tr > th,
+.spa-data-grid > thead > tr > td,
+.spa-data-grid > tbody > tr > td,
+.spa-data-grid > tfoot > tr > td {
+  padding: 8px;
+  line-height: 1.42857143;
+  vertical-align: top;
+  border-top: 1px solid #dddddd;
+}
+.spa-data-grid > thead > tr > th {
+  vertical-align: bottom;
+  border-bottom: 2px solid #dddddd;
+}
+.spa-data-grid > caption + thead > tr:first-child > th,
+.spa-data-grid > colgroup + thead > tr:first-child > th,
+.spa-data-grid > thead:first-child > tr:first-child > th,
+.spa-data-grid > caption + thead > tr:first-child > td,
+.spa-data-grid > colgroup + thead > tr:first-child > td,
+.spa-data-grid > thead:first-child > tr:first-child > td {
+  border-top: 0;
+}
+.spa-data-grid > tbody + tbody {
+  border-top: 2px solid #dddddd;
+}
+.spa-data-grid .table {
+  background-color: #ffffff;
+}
+.spa-data-grid > tbody > tr:nth-of-type(odd) {
+  background-color: #f9f9f9;
+}
+.spa-data-grid > thead > tr > th,
+.spa-data-grid > tbody > tr > th,
+.spa-data-grid > tfoot > tr > th,
+.spa-data-grid > thead > tr > td,
+.spa-data-grid > tbody > tr > td,
+.spa-data-grid > tfoot > tr > td {
+  border: 1px solid #dddddd;
+}
+.spa-data-grid > thead > tr > th,
+.spa-data-grid > thead > tr > td {
+  border-bottom-width: 2px;
+}
+.spa-data-grid thead tr th .dg-sortable {
+  cursor: pointer;
+}
