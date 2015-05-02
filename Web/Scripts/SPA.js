@@ -249,18 +249,6 @@ angular.module('SPA', ['SPA.Extensions', 'SPA.Data.Grid'])
 										visible: true
 									})
 								],
-								globalActions: [
-									new Function('Add', function () {
-										if (!rentId) {
-											alert('need to select a rent to go to');
-											return;
-										};
-										receipts.Add(rentId)
-											.then(function (rec) {
-												scope.Contents.Receipts.push(rec);
-											});
-									})
-								],
 								navigation: [],
 								rowActions: {
 									'Go To': [
@@ -299,6 +287,13 @@ angular.module('SPA', ['SPA.Extensions', 'SPA.Data.Grid'])
 									function () {
 										lm.SetLocation(lm.Pages.rent);
 									});
+
+								scope.Contents.Config.AddGlobalAction('Add', function () {
+									receipts.Add(rentId)
+										.then(function (rec) {
+											scope.Contents.Receipts.push(rec);
+										});
+								});
 
 								scope.Contents.Config.AddGlobalAction('Validate: "' + name + '"',
 									function () {
@@ -1359,7 +1354,7 @@ angular.module('SPA.Data.Grid', [])
 			var getDefaults = function () {
 				return {
 					columns: [],
-					globalActions: {},
+					globalActions: [],
 					rowActions: {},
 					save: function () { },
 					editable: false,
@@ -1468,7 +1463,8 @@ angular.module('SPA.Data.Grid', [])
 				restrict: 'E',
 				replace: false,
 				transclude: true,
-				templateUrl: SPA.Template('dg-string', 'DataGrid'),
+				//shared with currency
+				templateUrl: SPA.Template('dg-input', 'DataGrid'),
 				scope: {
 					row: '=',
 					column: '='
@@ -1489,7 +1485,7 @@ angular.module('SPA.Data.Grid', [])
 						}
 					};
 				},
-				templateUrl: SPA.Template('dg-input', 'DataGrid'),
+				templateUrl: SPA.Template('dg-read-only', 'DataGrid'),
 				scope: {
 					row: '=',
 					column: '='

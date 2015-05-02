@@ -6553,6 +6553,51 @@ body {
 .spa-content {
   padding: 40px;
 }
+.btn-action {
+  color: #ffffff;
+  background-color: #002dc2;
+  border-color: #040366;
+}
+.btn-action:hover,
+.btn-action:focus,
+.btn-action.focus,
+.btn-action:active,
+.btn-action.active,
+.open > .dropdown-toggle.btn-action {
+  color: #ffffff;
+  background-color: #00218f;
+  border-color: #02012b;
+}
+.btn-action:active,
+.btn-action.active,
+.open > .dropdown-toggle.btn-action {
+  background-image: none;
+}
+.btn-action.disabled,
+.btn-action[disabled],
+fieldset[disabled] .btn-action,
+.btn-action.disabled:hover,
+.btn-action[disabled]:hover,
+fieldset[disabled] .btn-action:hover,
+.btn-action.disabled:focus,
+.btn-action[disabled]:focus,
+fieldset[disabled] .btn-action:focus,
+.btn-action.disabled.focus,
+.btn-action[disabled].focus,
+fieldset[disabled] .btn-action.focus,
+.btn-action.disabled:active,
+.btn-action[disabled]:active,
+fieldset[disabled] .btn-action:active,
+.btn-action.disabled.active,
+.btn-action[disabled].active,
+fieldset[disabled] .btn-action.active {
+  background-color: #002dc2;
+  border-color: #040366;
+}
+.btn-action .badge {
+  color: #002dc2;
+  background-color: #ffffff;
+}
 .btn-navigation {
   color: #ffffff;
   background-color: #1eb20a;
