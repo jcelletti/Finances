@@ -35,7 +35,8 @@ var SPA = function () {
 SPA.Config = function () {
 	return {
 		DataTypes: {
-			string: 'string',
+			String: 'string',
+			ReadOnly: 'readonly',
 			Date: 'date',
 			Time: 'time',
 			DateTime: 'dateTime',
@@ -67,11 +68,6 @@ angular.module('SPA', ['SPA.Extensions', 'SPA.Data.Grid'])
 				restrict: 'A',
 				replace: false,
 				transclude: false,
-				controller: [
-					'$scope',
-					function ($scope) {
-					}
-				],
 				compile: function () {
 					return {
 						pre: function (scope, element) {
@@ -124,7 +120,8 @@ angular.module('SPA', ['SPA.Extensions', 'SPA.Data.Grid'])
 								columns: [
 									new Column({
 										binding: 'Name',
-										visible: true
+										dataType: SPA.Config.DataTypes.ReadOnly,
+										visible: false
 									}),
 									new Column({
 										title: 'Month',
@@ -749,7 +746,7 @@ angular.module('SPA.Extensions', ['ui.bootstrap', 'SPA.HTTP'])
 					put.Rent({
 						id: rent.Id,
 						month: rent.Date.toISOString(),
-						name: rent.Name
+						name: rent.Date.format('MMMM YYYY')
 					});
 				}
 			};
@@ -1323,6 +1320,8 @@ angular.module('SPA.Data.Grid', [])
 						return 'rents';
 					case SPA.Config.DataTypes.Currency:
 						return 'currency';
+					case SPA.Config.DataTypes.ReadOnly:
+						return 'read-only';
 					case SPA.Config.DataTypes.String:
 					default:
 						return 'string';
@@ -1331,7 +1330,7 @@ angular.module('SPA.Data.Grid', [])
 
 			var getArgs = function () {
 				return {
-					dataType: SPA.Config.DataTypes.string,
+					dataType: SPA.Config.DataTypes.String,
 					visible: false,
 					dateFormat: SPA.Config.DateFormats.Year
 				};
@@ -1464,6 +1463,19 @@ angular.module('SPA.Data.Grid', [])
 			}
 		})
 	.directive('dgString',
+		function () {
+			return {
+				restrict: 'E',
+				replace: false,
+				transclude: true,
+				templateUrl: SPA.Template('dg-string', 'DataGrid'),
+				scope: {
+					row: '=',
+					column: '='
+				}
+			};
+		})
+	.directive('dgReadOnly',
 		function () {
 			return {
 				restrict: 'E',
