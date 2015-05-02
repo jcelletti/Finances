@@ -10,24 +10,101 @@ body
 	padding: 40px;
 }
 
+.btn-navigation
+{
+	.button-variant(#ffffff, #1EB20A, #0F6603);
+}
 
 /*Data Grid*/
 
-.spa-data-grid
+.dg-data-grid
 {
-	.table();
-	.table-striped();
-	.table-bordered();
-
-	thead
+	.dg-title
 	{
-		tr
+		font-weight: bold;
+	}
+
+	.dg-header
+	{
+		margin: 10px 0 20px 0;
+
+		.dg-title
 		{
-			th
+			font-size: 25px;
+			margin-bottom: 10px;
+		}
+
+		.dg-summary-container
+		{
+			font-size: 20px;
+			margin-bottom: 10px;
+			padding-left: 10px;
+		}
+	}
+
+	.dg-actions
+	{
+		margin: 10px 0;
+		.clearfix();
+
+		.dg-action-container
+		{
+			border: 1px solid #656565;
+			border-radius: 4px;
+
+			.make-sm-column(4);
+			padding: 10px;
+
+			.dg-title
 			{
-				.dg-sortable
+				font-size: 15px;
+				font-weight: bold;
+			}
+
+			.dg-calculator
+			{
+				.dg-calc-row
 				{
-					cursor: pointer;
+					display: table;
+
+					textarea, span
+					{
+						display: table-cell;
+						vertical-align: middle;
+					}
+
+					span
+					{
+						padding: 0 10px;
+						font-size: 20px;
+						font-weight: bold;
+					}
+				}
+
+				textarea
+				{
+					resize: none;
+				}
+			}
+		}
+	}
+
+	.dg-table
+	{
+		.table();
+		.table-striped();
+		.table-bordered();
+
+		thead
+		{
+			tr
+			{
+				th
+				{
+					.dg-sortable
+					{
+						cursor: pointer;
+					}
 				}
 			}
 		}

@@ -1,14 +1,30 @@
-﻿<div>
+﻿<div class="dg-data-grid">
 
-	<div class="btn-group">
-		<button type="button" class="btn btn-primary" ng-repeat="(key, func) in config.GlobalActions" ng-bind="key" ng-click="func()"></button>
+	<div class="dg-header">
+		<div class="dg-title" ng-if="!!config.Title">
+			<span ng-bind="config.Title"></span>
+		</div>
+
+		<div class="btn-group" ng-if="config.Editable">
+			<button type="button" class="btn btn-primary" ng-repeat="f in config.GlobalActions" ng-bind="f.Text" ng-click="f.Click()"></button>
+		</div>
+
+		<div class="btn-group">
+			<button type="button" class="btn btn-navigation" ng-repeat="f in config.Navigation" ng-bind="f.Text" ng-click="f.Click()"></button>
+		</div>
+	</div>
+	
+	<div class="dg-summary-container" ng-if="!!config.Summary" dg-html="config.Summary"></div>
+
+	<div class="dg-actions" ng-if="config.Actions.length > 0">
+		<div class="dg-action-container" ng-repeat="action in config.Actions" dg-app="action"></div>
 	</div>
 
-	<table class="spa-data-grid">
+	<table class="dg-table">
 		<thead>
 			<tr>
-				<th>
-				</th>
+				<th ng-if="config.Editable"></th>
+
 				<th ng-repeat="c in config.Columns | filter: {Visible: true}">
 					<span class="dg-sortable" ng-bind="c.Title" ng-click="Functions.SortColumn(c)"></span>
 				</th>
@@ -19,7 +35,7 @@
 		</thead>
 		<tbody>
 			<tr ng-repeat="row in Contents.Rows">
-				<td width="150px">
+				<td width="150px" ng-if="config.Editable">
 					<button type="button" class="btn btn-default" ng-if="!row.IsEditing" ng-click="Functions.Edit(row)">Edit</button>
 					<div class="btn-group" ng-if="row.IsEditing">
 						<button type="button" class="btn btn-default" ng-click="Functions.Save(row)">Save</button>

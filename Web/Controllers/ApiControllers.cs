@@ -26,6 +26,17 @@ namespace Web.ApiControllers
 	{
 		public override void OnException(HttpActionExecutedContext context)
 		{
+			if (context.Exception is BadRequestException) {
+				var badReq = (BadRequestException)context.Exception;
+
+				context.Response = new HttpResponseMessage(HttpStatusCode.BadRequest) {
+					ReasonPhrase = "BadRequest",
+					Content = new StringContent(badReq.Message)
+				};
+
+				return;
+			}
+
 			base.OnException(context);
 		}
 	}
@@ -96,8 +107,7 @@ namespace Web.ApiControllers
 
 			Dictionary<Guid, decimal> owed = new Dictionary<Guid, decimal>();
 
-			foreach (var receipt in receipts)
-			{
+			foreach (var receipt in receipts) {
 				this.ValidateReceipt(receipt);
 
 				if (!owed.ContainsKey(receipt.Payer)) { owed.Add(receipt.Payer, 0); }
@@ -106,8 +116,7 @@ namespace Web.ApiControllers
 
 				decimal pmtReduction = 0;
 
-				foreach (var pmt in payments)
-				{
+				foreach (var pmt in payments) {
 					if (!owed.ContainsKey(pmt.Payer)) { owed.Add(pmt.Payer, 0); }
 
 					if (pmt.Payer == receipt.Payer) { continue; }
@@ -123,15 +132,13 @@ namespace Web.ApiControllers
 
 			decimal sum = 0;
 
-			foreach (var key in owed.Keys)
-			{
+			foreach (var key in owed.Keys) {
 				Renter renter = Database.Get<Renter>(key);
 				validated.Add(new RentValidationModel(key, renter.FullName, owed[key]));
 				sum += owed[key];
 			}
 
-			if (sum != 0)
-			{
+			if (sum != 0) {
 				throw new InvalidRentSumException(validated);
 			}
 
@@ -146,8 +153,7 @@ namespace Web.ApiControllers
 			decimal tip = 0;
 			decimal tax = 0;
 
-			foreach (var pmt in payments)
-			{
+			foreach (var pmt in payments) {
 				total += pmt.PaymentAmount;
 				tip += pmt.Tip;
 				tax += pmt.Tax;
@@ -161,16 +167,13 @@ namespace Web.ApiControllers
 
 			total = Math.Round(total, 2);
 
-			if (receipt.Total != total)
-			{
+			if (receipt.Total != total) {
 				throw new InvalidTotalException(receipt, total);
 			}
-			if (receipt.Tip != tip)
-			{
+			if (receipt.Tip != tip) {
 				throw new InvalidTipException(receipt, tip);
 			}
-			if (receipt.Tax != tax)
-			{
+			if (receipt.Tax != tax) {
 				throw new InvalidTaxException(receipt, tax);
 			}
 		}
@@ -179,8 +182,7 @@ namespace Web.ApiControllers
 		[Route("")]
 		public IHttpActionResult Add()
 		{
-			var rent = new Rent
-			{
+			var rent = new Rent {
 				Id = Guid.NewGuid(),
 				Name = "New Rent",
 				Month = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1)
@@ -219,6 +221,13 @@ namespace Web.ApiControllers
 		}
 
 		[HttpGet]
+		[Route("{id:guid}")]
+		public IHttpActionResult Get(Guid id)
+		{
+			return this.Ok(Database.Get<Receipt>(id));
+		}
+
+		[HttpGet]
 		[Route("{rentId:guid}/ByRent")]
 		public IHttpActionResult GetByRent(Guid rentId)
 		{
@@ -240,16 +249,15 @@ namespace Web.ApiControllers
 		[Route("{rentId:guid}")]
 		public IHttpActionResult Add(Guid rentId)
 		{
-			var receipt = new Receipt
-				{
-					Id = Guid.NewGuid(),
-					Name = "New Receipt",
-					Date = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1),
-					Tip = 0,
-					Total = 0,
-					Payer = Database.First<Renter>().Id,
-					RentId = (rentId == Guid.Empty) ? Database.First<Rent>().Id : rentId
-				};
+			var receipt = new Receipt {
+				Id = Guid.NewGuid(),
+				Name = "New Receipt",
+				Date = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1),
+				Tip = 0,
+				Total = 0,
+				Payer = Database.First<Renter>().Id,
+				RentId = (rentId == Guid.Empty) ? Database.First<Rent>().Id : rentId
+			};
 
 			Database.Insert(receipt);
 
@@ -280,8 +288,7 @@ namespace Web.ApiControllers
 			decimal tip = 0;
 			decimal tax = 0;
 
-			foreach (var pmt in payments)
-			{
+			foreach (var pmt in payments) {
 				total += pmt.PaymentAmount;
 				tip += pmt.Tip;
 				tax += pmt.Tax;
@@ -295,16 +302,13 @@ namespace Web.ApiControllers
 
 			total = Math.Round(total, 2);
 
-			if (receipt.Total != total)
-			{
+			if (receipt.Total != total) {
 				throw new InvalidTotalException(receipt, total);
 			}
-			if (receipt.Tip != tip)
-			{
+			if (receipt.Tip != tip) {
 				throw new InvalidTipException(receipt, tip);
 			}
-			if (receipt.Tax != tax)
-			{
+			if (receipt.Tax != tax) {
 				throw new InvalidTaxException(receipt, tax);
 			}
 		}
@@ -338,8 +342,7 @@ namespace Web.ApiControllers
 		[Route("{receiptId:guid}")]
 		public IHttpActionResult Add(Guid receiptId)
 		{
-			var payment = new Payment
-			{
+			var payment = new Payment {
 				Id = Guid.NewGuid(),
 				PaymentAmount = 0,
 				Tip = 0,
@@ -351,6 +354,14 @@ namespace Web.ApiControllers
 			payment.Payer = Database.First<Renter>().Id;
 			Database.Insert(payment);
 
+			return this.Ok(Database.Get<Payment>(payment.Id));
+		}
+
+		[HttpPut]
+		[Route("")]
+		public IHttpActionResult Update(Payment payment)
+		{
+			Database.Update(payment);
 			return this.Ok(Database.Get<Payment>(payment.Id));
 		}
 

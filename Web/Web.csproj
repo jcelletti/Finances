@@ -296,6 +296,8 @@
     <Content Include="Content\SPA.less" />
     <None Include="Properties\PublishProfiles\JCellettiLocal.pubxml" />
     <None Include="Properties\PublishProfiles\Rent.pubxml" />
+    <Content Include="NgTemplates\DataGrid\dg-calculator.html" />
+    <Content Include="NgTemplates\DataGrid\dg-rents.html" />
     <Content Include="NgTemplates\DataGrid\dg-renters.html" />
     <Content Include="NgTemplates\DataGrid\dg-input.html" />
     <Content Include="NgTemplates\DataGrid\dg-date-time.html" />
