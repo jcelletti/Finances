@@ -40,7 +40,13 @@ namespace Web
 				"~/Scripts/app.js"));
 
 			bundles.Add(new ScriptBundle("~/Scripts/SpaBundle")
-				.Include("~/Scripts/SPA.js"));
+				.Include(
+				"~/Scripts/SPA/main.js",
+				"~/Scripts/SPA/models.js",
+				"~/Scripts/SPA/extensions.js",
+				"~/Scripts/SPA/http.js",
+				"~/Scripts/SPA/data.grid.js"
+				));
 		}
 
 		private static void RegisterStyles(BundleCollection bundles)
@@ -49,7 +55,7 @@ namespace Web
 				.Include("~/Content/site.css"));
 
 			bundles.Add(new StyleBundle("~/Styles/SpaBundle")
-				.Include("~/Content/SPA.css"));
+				.Include("~/Content/SPA/SPA.css"));
 		}
 	}
 }

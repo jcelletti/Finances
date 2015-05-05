@@ -213,7 +213,13 @@
     <Content Include="Content\site.min.css">
       <DependentUpon>site.css</DependentUpon>
     </Content>
-    <Content Include="Content\SPA.css">
+    <Content Include="Content\SPA\data.css">
+      <DependentUpon>data.grid.less</DependentUpon>
+    </Content>
+    <Content Include="Content\SPA\modals.css">
+      <DependentUpon>modals.less</DependentUpon>
+    </Content>
+    <Content Include="Content\SPA\SPA.css">
       <DependentUpon>SPA.less</DependentUpon>
     </Content>
     <Content Include="favicon.ico" />
@@ -293,7 +299,9 @@
     <Content Include="Content\bootstrap\bootstrap.less" />
     <Content Include="Content\bootstrap\badges.less" />
     <Content Include="Content\bootstrap\alerts.less" />
-    <Content Include="Content\SPA.less" />
+    <Content Include="Content\SPA\SPA.less" />
+    <Content Include="Content\SPA\modals.less" />
+    <Content Include="Content\SPA\data.grid.less" />
     <None Include="Properties\PublishProfiles\JCellettiLocal.pubxml" />
     <None Include="Properties\PublishProfiles\Rent.pubxml" />
     <Content Include="NgTemplates\DataGrid\dg-calculator.html" />
@@ -1102,7 +1110,11 @@
     <Content Include="Scripts\moment-with-locales.min.js" />
     <Content Include="Scripts\moment.js" />
     <Content Include="Scripts\moment.min.js" />
-    <Content Include="Scripts\SPA.js" />
+    <Content Include="Scripts\SPA\data.grid.js" />
+    <Content Include="Scripts\SPA\models.js" />
+    <Content Include="Scripts\SPA\extensions.js" />
+    <Content Include="Scripts\SPA\http.js" />
+    <Content Include="Scripts\SPA\main.js" />
     <Content Include="template\accordion\accordion-group.html" />
     <Content Include="template\accordion\accordion.html" />
     <Content Include="template\alert\alert.html" />
