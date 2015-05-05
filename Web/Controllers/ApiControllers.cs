@@ -20,6 +20,91 @@ namespace Web.ApiControllers
 			: base()
 		{
 		}
+
+		protected static void ValidateReceipt(Dictionary<Guid, decimal> owed, Receipt receipt)
+		{
+			IEnumerable<Payment> payments = Database.GetPaymentsByReceipt(receipt.Id);
+
+			decimal total = 0;
+			decimal tip = 0;
+			decimal tax = 0;
+
+			decimal pmtReduction = 0;
+			foreach (Payment pmt in payments) {
+				total += pmt.PaymentAmount;
+				tip += pmt.Tip;
+				tax += pmt.Tax;
+
+				if (pmt.Payer == receipt.Payer) {
+					continue;
+				}
+
+				decimal payeeTotal = pmt.PaymentAmount + pmt.Tip + pmt.Tax;
+
+				pmtReduction += payeeTotal;
+
+				owed[pmt.Payer] += payeeTotal;
+			}
+
+			owed[receipt.Payer] -= pmtReduction;
+
+			tip = Math.Round(tip, 2);
+
+			tax = Math.Round(tax, 2);
+
+			total += tip + tax;
+
+			total = Math.Round(total, 2);
+
+			if (receipt.Total != total) {
+				throw new InvalidTotalException(receipt, total);
+			}
+
+			if (receipt.Tip != tip) {
+				throw new InvalidTipException(receipt, tip);
+			}
+
+			if (receipt.Tax != tax) {
+				throw new InvalidTaxException(receipt, tax);
+			}
+		}
+
+		protected static Dictionary<Guid, decimal> GetOwedDefault(out IEnumerable<Renter> renters)
+		{
+			var owed = new Dictionary<Guid, decimal>();
+
+			renters = Database.GetAll<Renter>();
+
+			foreach (Renter renter in renters) {
+				owed.Add(renter.Id, 0);
+			}
+
+			return owed;
+		}
+
+		protected static List<RentValidationModel> GetValidationModel(Dictionary<Guid, decimal> owed, IEnumerable<Renter> renters)
+		{
+			decimal sum = 0;
+			var validated = new List<RentValidationModel>();
+
+			foreach (Guid key in owed.Keys) {
+
+				decimal owedAmount = owed[key];
+				if (owedAmount == 0) {
+					continue;
+				}
+
+				Renter renter = renters.First(r => r.Id == key);
+				validated.Add(new RentValidationModel(key, renter.FullName,owedAmount));
+				sum += owed[key];
+			}
+
+			if (sum != 0) {
+				throw new InvalidRentSumException(validated);
+			}
+
+			return validated;
+		}
 	}
 
 	public class ApiExceptionFilter : ExceptionFilterAttribute
@@ -101,81 +186,18 @@ namespace Web.ApiControllers
 		[Route("{id:guid}/Validate")]
 		public IHttpActionResult Validate(Guid id)
 		{
-			List<RentValidationModel> validated = new List<RentValidationModel>();
-
 			IEnumerable<Receipt> receipts = Database.GetAllByRent<Receipt>(id);
 
-			Dictionary<Guid, decimal> owed = new Dictionary<Guid, decimal>();
+			IEnumerable<Renter> renters;
+			Dictionary<Guid, decimal> owed = ApiControllerBase.GetOwedDefault(out renters);
 
-			foreach (var receipt in receipts) {
-				this.ValidateReceipt(receipt);
-
-				if (!owed.ContainsKey(receipt.Payer)) { owed.Add(receipt.Payer, 0); }
-
-				IEnumerable<Payment> payments = Database.GetPaymentsByReceipt(receipt.Id);
-
-				decimal pmtReduction = 0;
-
-				foreach (var pmt in payments) {
-					if (!owed.ContainsKey(pmt.Payer)) { owed.Add(pmt.Payer, 0); }
-
-					if (pmt.Payer == receipt.Payer) { continue; }
-					var payeeTotal = pmt.PaymentAmount + pmt.Tip + pmt.Tax;
-
-					pmtReduction += payeeTotal;
-
-					owed[pmt.Payer] += payeeTotal;
-				}
-
-				owed[receipt.Payer] -= pmtReduction;
+			foreach (Receipt receipt in receipts) {
+				ApiControllerBase.ValidateReceipt(owed, receipt);
 			}
 
-			decimal sum = 0;
-
-			foreach (var key in owed.Keys) {
-				Renter renter = Database.Get<Renter>(key);
-				validated.Add(new RentValidationModel(key, renter.FullName, owed[key]));
-				sum += owed[key];
-			}
-
-			if (sum != 0) {
-				throw new InvalidRentSumException(validated);
-			}
+			List<RentValidationModel> validated = ApiControllerBase.GetValidationModel(owed, renters);
 
 			return this.Ok(validated);
-		}
-
-		private void ValidateReceipt(Receipt receipt)
-		{
-			IEnumerable<Payment> payments = Database.GetPaymentsByReceipt(receipt.Id);
-
-			decimal total = 0;
-			decimal tip = 0;
-			decimal tax = 0;
-
-			foreach (var pmt in payments) {
-				total += pmt.PaymentAmount;
-				tip += pmt.Tip;
-				tax += pmt.Tax;
-			}
-
-			tip = Math.Round(tip, 2);
-
-			tax = Math.Round(tax, 2);
-
-			total += tip + tax;
-
-			total = Math.Round(total, 2);
-
-			if (receipt.Total != total) {
-				throw new InvalidTotalException(receipt, total);
-			}
-			if (receipt.Tip != tip) {
-				throw new InvalidTipException(receipt, tip);
-			}
-			if (receipt.Tax != tax) {
-				throw new InvalidTaxException(receipt, tax);
-			}
 		}
 
 		[HttpPost]
@@ -240,9 +262,14 @@ namespace Web.ApiControllers
 		{
 			Receipt receipt = Database.Get<Receipt>(id);
 
-			this.ValidateReceipt(receipt);
+			IEnumerable<Renter> renters;
+			Dictionary<Guid, decimal> owed = ApiControllerBase.GetOwedDefault(out renters);
 
-			return this.Ok();
+			ApiControllerBase.ValidateReceipt(owed, receipt);
+
+			List<RentValidationModel> validated = ApiControllerBase.GetValidationModel(owed, renters);
+
+			return this.Ok(validated);
 		}
 
 		[HttpPost]
@@ -278,39 +305,6 @@ namespace Web.ApiControllers
 		{
 			Database.Delete<Receipt>(id);
 			return this.Ok();
-		}
-
-		private void ValidateReceipt(Receipt receipt)
-		{
-			IEnumerable<Payment> payments = Database.GetPaymentsByReceipt(receipt.Id);
-
-			decimal total = 0;
-			decimal tip = 0;
-			decimal tax = 0;
-
-			foreach (var pmt in payments) {
-				total += pmt.PaymentAmount;
-				tip += pmt.Tip;
-				tax += pmt.Tax;
-			}
-
-			tip = Math.Round(tip, 2);
-
-			tax = Math.Round(tax, 2);
-
-			total += tip + tax;
-
-			total = Math.Round(total, 2);
-
-			if (receipt.Total != total) {
-				throw new InvalidTotalException(receipt, total);
-			}
-			if (receipt.Tip != tip) {
-				throw new InvalidTipException(receipt, tip);
-			}
-			if (receipt.Tax != tax) {
-				throw new InvalidTaxException(receipt, tax);
-			}
 		}
 	}
 

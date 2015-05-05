@@ -1,0 +1,21 @@
+﻿<div id="spa-val-modal" class="spa-modal">
+
+	<div class="spa-modal-content">
+
+		<div class="spa-val-item" ng-repeat="val in Contents.Validations | filter: Functions.Filter()">
+			<span class="val-item-name" ng-bind="val.Name"></span>
+			<span ng-if="val.Owes">Owes</span>
+			<span ng-if="!val.Owes">Is Owed</span>
+			<span class="val-item-owed" ng-bind="val.Owed"></span>
+		</div>
+	</div>
+
+	<div class="spa-modal-footer">
+		<div class="btn-group-sm">
+			<button type="button" class="btn btn-primary" ng-click="Functions.ShowAll()">
+				<span ng-if="!Contents.ShowAll">Show all</span>
+				<span ng-if="Contents.ShowAll">Show who owes</span>
+			</button>
+		</div>
+	</div>
+</div>

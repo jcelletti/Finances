@@ -303,6 +303,7 @@
     <Content Include="NgTemplates\DataGrid\dg-input.html" />
     <Content Include="NgTemplates\DataGrid\dg-date-time.html" />
     <Content Include="NgTemplates\DataGrid\spa-data-grid.html" />
+    <Content Include="NgTemplates\Modals\validation.html" />
     <Content Include="NgTemplates\spa-payments.html" />
     <Content Include="NgTemplates\spa-receipts.html" />
     <Content Include="NgTemplates\spa-rents.html" />

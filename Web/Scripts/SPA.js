@@ -97,8 +97,8 @@ angular.module('SPA', ['SPA.Extensions', 'SPA.Data.Grid'])
 		}
 	])
 	.directive('spaRents', [
-		'Rents', 'dgConfiguration', 'dgColumn', 'dgFunction', 'spaLocation',
-		function (rents, Config, Column, Function, lm) {
+		'Rents', 'dgConfiguration', 'dgColumn', 'dgFunction', 'spaLocation', 'spaModals',
+		function (rents, Config, Column, Function, lm, modals) {
 			return {
 				restrict: 'E',
 				replace: true,
@@ -164,8 +164,7 @@ angular.module('SPA', ['SPA.Extensions', 'SPA.Data.Grid'])
 										new Function('Validate', function (row) {
 											rents.Validate(row.Data.Id)
 												.then(function (res) {
-													//todo: modal saying who owes what
-													console.log(res);
+													modals.Validation(res);
 												});
 										}),
 										new Function('Delete', function (row) {
@@ -190,8 +189,8 @@ angular.module('SPA', ['SPA.Extensions', 'SPA.Data.Grid'])
 		}
 	])
 	.directive('spaReceipts', [
-		'Receipts', 'Rents', 'dgConfiguration', 'dgColumn', 'dgFunction', 'spaLocation',
-		function (receipts, rents, Config, Column, Function, lm) {
+		'Receipts', 'Rents', 'dgConfiguration', 'dgColumn', 'dgFunction', 'spaLocation', 'spaModals',
+		function (receipts, rents, Config, Column, Function, lm, modals) {
 			return {
 				restrict: 'E',
 				replace: true,
@@ -261,7 +260,7 @@ angular.module('SPA', ['SPA.Extensions', 'SPA.Data.Grid'])
 										new Function('Validate', function (row) {
 											receipts.Validate(row.Data.Id)
 												.then(function (res) {
-													console.log(res);
+													modals.Validation(res, true);
 												});
 										}),
 										new Function('Delete', function (row) {
@@ -640,6 +639,22 @@ angular.module('SPA.models', [])
 				p.Tip = payment.tip;
 				p.Amount = payment.paymentAmount;
 			};
+		})
+	.factory('Validation',
+		function () {
+			return function (v) {
+				var val = this;
+
+				val.Id = v.id;
+				val.Name = v.name;
+				val.Owed = v.owed;
+				val.Owes = true;
+
+				if (val.Owed <= 0) {
+					val.Owed = val.Owed * -1;
+					val.Owes = false;
+				};
+			};
 		});
 
 angular.module('SPA.Extensions', ['ui.bootstrap', 'SPA.HTTP'])
@@ -647,6 +662,51 @@ angular.module('SPA.Extensions', ['ui.bootstrap', 'SPA.HTTP'])
 		'$modal',
 		function ($modal) {
 			var svc = this;
+
+			svc.Validation = function (validations, showAll) {
+				//todo: modal saying who owes what
+
+				validations.sort(function (v1, v2) {
+					var owed1 = v1.Owed;
+					var owed2 = v2.Owed;
+
+					if (!v1.Owes) {
+						owed1 = owed1 * -1;
+					};
+					
+					if (!v2.Owes) {
+						owed2 = owed2 * -1;
+					};
+
+					return owed1 - owed2;
+				});
+
+				$modal.open({
+					templateUrl: SPA.Template('validation', 'Modals'),
+					controller: function ($scope) {
+						$scope.Contents = {
+							Validations: validations,
+							ShowAll: showAll === true
+						};
+
+						$scope.Functions = {
+							Filter: function () {
+								return function (val) {
+									if ($scope.Contents.ShowAll) {
+										return true;
+									};
+
+									return val.Owes;
+								}
+							},
+							ShowAll: function () {
+								$scope.Contents.ShowAll = !$scope.Contents.ShowAll;
+							}
+						};
+
+					}
+				});
+			};
 		}
 	])
 	.service('Renters', [
@@ -1128,20 +1188,20 @@ angular.module('SPA.HTTP', ['ui.bootstrap', 'SPA.models'])
 		}
 	])
 	.service('HttpValidate', [
-		'$http', 'HttpDefer',
-		function ($http, Defer) {
+		'$http', 'HttpDefer', 'Validation',
+		function ($http, Defer, Validation) {
 			var svc = this;
 
 			svc.Rent = function (id) {
 				return new Defer(function () {
 					return $http.get('Rent/' + id + '/Validate');
-				});
+				}, Validation);
 			};
 
 			svc.Receipt = function (id) {
 				return new Defer(function () {
 					return $http.get('Receipt/' + id + '/Validate');
-				});
+				}, Validation);
 			};
 		}
 	]);
