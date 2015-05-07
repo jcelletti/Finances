@@ -54,9 +54,9 @@
 							text: "Validate",
 							visible: function (row) { return !row.isEditing; },
 							className: "btn-primary",
-							click: function (rent) {
+							click: function (row) {
 								$.ajax({
-									url: validationLocation + rent.Id,
+									url: validationLocation + row.data.Id,
 									type: 'POST',
 									success: function (result) {
 										var ul = $('<ul />');

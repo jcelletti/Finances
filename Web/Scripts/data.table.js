@@ -96,7 +96,7 @@ angular.module("edit.data.table", [])
 })
 .directive("editControl", function ($compile) {
 	var templates = {
-		select: function (scope) {
+		select: function () {
 			return "<select class='form-control' " +
 				"ng-model='val' " + " ng-options='key as value for " +
 				"(key, value) in col.options'></select>"

@@ -1,0 +1,17 @@
+﻿@{
+	this.Layout = "~/Views/SPA/_Layout.cshtml";
+	this.ViewBag.Title = "Rent";
+}
+
+<div class="spa-content" ng-if="Contents.RentsLoaded && Contents.RentersLoaded">
+	<spa-dynamic template="Contents.Template"></spa-dynamic>
+</div>
+
+<!--
+	add function to get all users and store them in a central location
+		must have an update
+
+	add central location for all rents
+		must have an update
+
+-->

@@ -1,0 +1,6 @@
+﻿<div>
+	<div ng-if="!row.IsEditing" ng-bind="Contents.Format"></div>
+	<div ng-if="row.IsEditing">
+		<datepicker ng-model="Contents.EditValue" datepicker-mode="Contents.Options.Mode"></datepicker>
+	</div>
+</div>
