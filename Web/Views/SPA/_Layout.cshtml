@@ -1,0 +1,30 @@
+﻿@{
+	string appPath = this.Request.ApplicationPath;
+
+	if (!appPath.EndsWith("/")) {
+		appPath += "/";
+	}
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta name="viewport" content="width=device-width" />
+	<title>@(this.ViewBag.Title)</title>
+
+	<base href="@(appPath)" />
+
+	@Styles.Render("~/Styles/SpaBundle")
+	@Scripts.Render(
+			"~/bundles/jquery",
+			"~/bundles/modernizr",
+			"~/bundles/moment",
+			"~/bundles/Angularjs",
+			"~/Scripts/SpaBundle")
+
+</head>
+<body ng-app="SPA" spa-main>
+	@(this.RenderBody())
+</body>
+</html>

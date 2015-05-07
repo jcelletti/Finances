@@ -1,0 +1,8 @@
+﻿<div>
+	<div ng-if="!row.IsEditing" ng-bind="Contents.Name"></div>
+	<div ng-if="row.IsEditing">
+		<select class="form-control" ng-model="Contents.Value" ng-options="id as r.FullName for (id, r) in Contents.Renters">
+			<option value="">--Select A Renter--</option>
+		</select>
+	</div>
+</div>

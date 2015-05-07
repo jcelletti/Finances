@@ -2,3 +2,6 @@ Core/bin/
 Core/obj/
 Web/bin/
 Web/obj/
+Web/Web.config
+*.user
+*.suo

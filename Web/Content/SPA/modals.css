@@ -1,0 +1,43 @@
+﻿.spa-modal {
+  font-size: 20px;
+}
+.spa-modal .spa-modal-content {
+  padding: 10px;
+}
+.spa-modal .spa-modal-footer {
+  padding: 5px;
+  border-top: 1px solid #656565;
+  background: #e2e2e2;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+#spa-val-modal .spa-modal-content {
+  display: table;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 20px;
+}
+#spa-val-modal .spa-modal-content .spa-val-item {
+  display: table-row;
+}
+#spa-val-modal .spa-modal-content .spa-val-item:nth-child(even) {
+  background: #e2e2e2;
+}
+#spa-val-modal .spa-modal-content .spa-val-item span {
+  display: table-cell;
+  padding: 10px 5px;
+}
+#spa-val-modal .spa-modal-content .spa-val-item .val-item-name {
+  font-weight: bold;
+  padding-right: 10px;
+  padding-left: 10px;
+}
+#spa-val-modal .spa-modal-content .spa-val-item .val-item-owed {
+  padding-right: 10px;
+  padding-left: 10px;
+  text-align: right;
+}
+#spa-val-modal .spa-modal-content .spa-val-item .val-item-owed:before {
+  content: '$';
+  font-weight: bold;
+}

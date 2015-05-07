@@ -1,0 +1,92 @@
+﻿.dg-data-grid
+{
+	.dg-title
+	{
+		font-weight: bold;
+	}
+
+	.dg-header
+	{
+		margin: 10px 0 20px 0;
+
+		.dg-title
+		{
+			font-size: 25px;
+			margin-bottom: 10px;
+		}
+
+		.dg-summary-container
+		{
+			font-size: 20px;
+			margin-bottom: 10px;
+			padding-left: 10px;
+		}
+	}
+
+	.dg-actions
+	{
+		margin: 10px 0;
+		.clearfix();
+
+		.dg-action-container
+		{
+			border: 1px solid #656565;
+			border-radius: 4px;
+			.make-sm-column(4);
+			padding: 10px;
+
+			.dg-title
+			{
+				font-size: 15px;
+				font-weight: bold;
+			}
+
+			.dg-calculator
+			{
+				.dg-calc-row
+				{
+					display: table;
+
+					textarea, span
+					{
+						display: table-cell;
+						vertical-align: middle;
+					}
+
+					span
+					{
+						padding: 0 10px;
+						font-size: 20px;
+						font-weight: bold;
+					}
+				}
+
+				textarea
+				{
+					resize: none;
+				}
+			}
+		}
+	}
+
+	.dg-table
+	{
+		.table();
+		.table-striped();
+		.table-bordered();
+
+		thead
+		{
+			tr
+			{
+				th
+				{
+					.dg-sortable
+					{
+						cursor: pointer;
+					}
+				}
+			}
+		}
+	}
+}

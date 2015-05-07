@@ -1,0 +1,6 @@
+﻿<div>
+	<div ng-if="!row.IsEditing" ng-bind="row.Data[column.Binding]"></div>
+	<div ng-if="row.IsEditing">
+		<input type="text" class="form-control" ng-model="row.Data[column.Binding]" />
+	</div>
+</div>

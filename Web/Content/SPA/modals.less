@@ -1,0 +1,65 @@
+﻿.spa-modal
+{
+	font-size: 20px;
+
+	.spa-modal-content
+	{
+		padding: 10px;
+	}
+
+	.spa-modal-footer
+	{
+		padding: 5px;
+		border-top: 1px solid #656565;
+		background: #e2e2e2;
+		border-bottom-left-radius: 4px;
+		border-bottom-right-radius: 4px;
+	}
+}
+
+#spa-val-modal
+{
+	.spa-modal-content
+	{
+		display: table;
+		width: 100%;
+		padding: 0;
+		margin-bottom: 20px;
+
+		.spa-val-item
+		{
+			display: table-row;
+
+			&:nth-child(even)
+			{
+				background: #e2e2e2;
+			}
+
+			span
+			{
+				display: table-cell;
+				padding: 10px 5px;
+			}
+
+			.val-item-name
+			{
+				font-weight: bold;
+				padding-right: 10px;
+				padding-left: 10px;
+			}
+
+			.val-item-owed
+			{
+				padding-right: 10px;
+				padding-left: 10px;
+				text-align: right;
+
+				&:before
+				{
+					content: '$';
+					font-weight: bold;
+				}
+			}
+		}
+	}
+}
