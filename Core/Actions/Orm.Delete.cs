@@ -1,14 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using System.Reflection;
-
-using Core.Classes;
 using Core.Attributes;
 
 namespace Core.Actions
