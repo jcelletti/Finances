@@ -9,12 +9,10 @@ namespace Core.Actions
 {
 	public class Database
 	{
-
 		public static T First<T>()
 		{
 			IDbCommand command = null;
 
-			SqlDataReader reader = null;
 			try
 			{
 				command = DbActions.GetCommand();
@@ -23,15 +21,12 @@ namespace Core.Actions
 			finally
 			{
 				DbActions.DisposeCommand(command);
-				DbActions.DisposeReader(reader);
 			}
 		}
 
 		public static T Get<T>(Guid id)
 		{
 			IDbCommand command = null;
-
-			SqlDataReader reader = null;
 			try
 			{
 				command = DbActions.GetCommand();
@@ -40,7 +35,6 @@ namespace Core.Actions
 			finally
 			{
 				DbActions.DisposeCommand(command);
-				DbActions.DisposeReader(reader);
 			}
 		}
 

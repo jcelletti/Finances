@@ -39,7 +39,7 @@ namespace Core.Actions
 
 			var keyAttr = key.GetCustomAttribute<OrmAttribute>();
 
-			
+
 			sb.AppendFormat("WHERE {0} = '{1}'", keyAttr.Column, ((PropertyInfo)key).GetValue(item));
 
 			command.CommandText = sb.ToString();
@@ -48,6 +48,5 @@ namespace Core.Actions
 			command.ExecuteNonQuery();
 
 		}
-
 	}
 }
